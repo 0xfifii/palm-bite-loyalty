@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+/*
+  Palm Bite design tokens. Every colour in the app comes from here.
+  olive and peach are sampled directly from the supplied Palm Bite logo.
+*/
+@theme {
+  --color-olive: #5d724b;
+  --color-olive-deep: #34432a;
+  --color-olive-night: #222c1b;
+  --color-sage: #a9b89a;
+  --color-sage-soft: #dce3d2;
+  --color-sage-mist: #edf0e6;
+  --color-cream: #f6f1e7;
+  --color-cream-deep: #ece4d4;
+  --color-peach: #eecfba;
+  --color-peach-soft: #f8e8dc;
+  --color-peach-deep: #d4a07f;
+  --color-surface: #ffffff;
+  --color-ink: #1d2119;
+  --color-muted: #676c60;
+  --color-line: #e2dbcd;
+  --color-danger: #a8402f;
+  --color-danger-soft: #f6e1dc;
+  --color-success: #4f6b3a;
+
+  --font-display: var(--font-archivo), "Arial Black", system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-sheet: 2rem;
+  --radius-card: 1.5rem;
+
+  --shadow-lift: 0 18px 40px -22px rgb(34 44 27 / 0.45);
+  --shadow-soft: 0 10px 30px -18px rgb(34 44 27 / 0.3);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root {
+  color-scheme: light;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Expanded heavy display type, the reference's signature treatment. */
+.type-display {
+  font-family: var(--font-display);
+  font-stretch: 125%;
+  font-weight: 860;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+}
+
+.type-heading {
+  font-family: var(--font-display);
+  font-stretch: 108%;
+  font-weight: 720;
+  letter-spacing: -0.015em;
+  line-height: 1.08;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-olive);
+  outline-offset: 3px;
+  border-radius: 0.6rem;
+}
+
+.logo-mask {
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Bite-shaped stamp: a circle with a bite taken from the upper right,
+   echoing the bitten P in the Palm Bite logo. */
+.stamp-bite {
+  -webkit-mask: radial-gradient(circle at 92% 14%, transparent 0 22%, #000 23%);
+  mask: radial-gradient(circle at 92% 14%, transparent 0 22%, #000 23%);
+}
+
+@keyframes splash-in {
+  from { opacity: 0; transform: scale(0.94); filter: blur(6px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes splash-out {
+  to { opacity: 0; visibility: hidden; }
+}
+@keyframes stamp-pop {
+  0% { transform: scale(0.4) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes rise {
+  from { transform: translateY(18px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes scan-line {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(var(--travel, 220px)); }
+  100% { transform: translateY(0); }
+}
+@keyframes ring {
+  from { transform: scale(0.6); opacity: 0.7; }
+  to { transform: scale(1.8); opacity: 0; }
+}
+
+.animate-splash-in { animation: splash-in 700ms var(--ease-out-soft) both; }
+.animate-stamp-pop { animation: stamp-pop 520ms var(--ease-out-soft) both; }
+.animate-rise { animation: rise 520ms var(--ease-out-soft) both; }
+.animate-sheet-up { animation: sheet-up 420ms var(--ease-out-soft) both; }
+.animate-scan-line { animation: scan-line 2.6s ease-in-out infinite; }
+.animate-ring { animation: ring 1.4s ease-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
