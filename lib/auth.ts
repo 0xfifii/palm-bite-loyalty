@@ -5,15 +5,17 @@ import { createClient } from "@/lib/supabase/server";
 import type { Profile, UserRole } from "@/lib/types";
 
 /**
- * Returns the verified user and their profile. getUser() validates the
- * session with Supabase Auth on every call, so a forged cookie is rejected.
- * The role always comes from the database, never from the client.
+ * Returns the verified user and their profile. getClaims() verifies the
+ * session token's signature (locally with the project's signing keys, or with
+ * Supabase Auth on older projects), so a forged cookie is rejected without an
+ * extra network round trip on every page. The role always comes from the
+ * database, never from the client.
  */
 export const getSession = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
+  const sub = data?.claims?.sub;
+  const user = typeof sub === "string" ? { id: sub } : null;
   if (!user) return { supabase, user: null, profile: null } as const;
 
   const { data: profile } = await supabase
