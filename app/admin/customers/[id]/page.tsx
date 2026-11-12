@@ -212,8 +212,8 @@ export default async function CustomerDetail({ params }: { params: Promise<{ id:
                   Role
                 </label>
                 <select id="role" name="role" defaultValue={p.role} className={inputCls}>
-                  <option value="customer">Customer</option>
-                  <option value="staff">Staff: redeem drinks, check in guests, show the QR</option>
+                  <option value="customer">Palm Fren (customer)</option>
+                  <option value="staff">Palm Staff: approve visits, redeem drinks, show the QR</option>
                   <option value="admin">Administrator: full access</option>
                 </select>
                 <SubmitButton variant="outline" size="sm" pendingLabel="Saving...">

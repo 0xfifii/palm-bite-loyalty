@@ -124,3 +124,26 @@ export async function staffCheckIn(customerId: string, note: string): Promise<Re
   };
   return { ok: false, error: messages[r.code] ?? actionMessage(r.code), code: r.code };
 }
+
+export async function decideVisit(requestId: string, approve: boolean): Promise<Result<{ name: string; points?: number; rewardUnlocked?: boolean }>> {
+  const { supabase } = await staff();
+  const id = z.uuid().safeParse(requestId);
+  if (!id.success) return { ok: false, error: actionMessage("REQUEST_NOT_FOUND") };
+  const { data, error } = await supabase.rpc("staff_decide_visit", { p_request: id.data, p_approve: approve });
+  if (error) return { ok: false, error: actionMessage("TEMPORARY_ERROR") };
+  const r = data as RpcResult;
+  const name = String(r.customer_name ?? "Palm Fren");
+  if (r.code === "POINT_AWARDED") {
+    const account = r.account as { points: number } | undefined;
+    revalidatePath("/admin");
+    return { ok: true, data: { name, points: account?.points, rewardUnlocked: r.reward_unlocked === true } };
+  }
+  if (r.code === "VISIT_DECLINED") return { ok: true, data: { name }, message: `Declined ${name}'s visit.` };
+  const messages: Record<string, string> = {
+    ALREADY_COLLECTED_TODAY: `${name} already collected today's point.`,
+    REWARD_PENDING_REDEMPTION: `${name} has a free drink waiting. Redeem it first.`,
+    ACCOUNT_SUSPENDED: `${name}'s account is suspended.`,
+    REQUEST_EXPIRED: "This request timed out. Ask the guest to scan the new code.",
+  };
+  return { ok: false, error: messages[r.code] ?? actionMessage(r.code), code: r.code };
+}

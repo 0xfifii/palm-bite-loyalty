@@ -35,8 +35,8 @@ export async function POST(request: Request) {
           return data.user?.id ?? null;
         },
         rateLimit,
-        award: async (a) => {
-          const { data, error } = await admin.rpc("award_qr_visit", {
+        request: async (a) => {
+          const { data, error } = await admin.rpc("request_qr_visit", {
             p_customer: a.customerId,
             p_session_id: a.sessionId,
             p_token_hash: a.tokenHash,

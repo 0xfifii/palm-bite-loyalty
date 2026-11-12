@@ -87,13 +87,34 @@ export async function issueQr(staffId: string) {
   return t;
 }
 
-export async function scan(customerId: string, qr: { sessionId: string; tokenHash: string }, idem = randomUUID()) {
+/** Raw customer scan: creates a pending visit request (no point yet). */
+export async function requestScan(customerId: string, qr: { sessionId: string; tokenHash: string }, idem = randomUUID()) {
   return rpc(
     "service_role",
     null,
-    "select public.award_qr_visit($1, $2, $3, $4, $5)",
+    "select public.request_qr_visit($1, $2, $3, $4, $5)",
     [customerId, qr.sessionId, qr.tokenHash, LOCATION_ID, idem],
   );
+}
+
+export async function decide(staffId: string, requestId: unknown, approve = true) {
+  return rpc("authenticated", staffId, "select public.staff_decide_visit($1, $2)", [requestId, approve]);
+}
+
+let approverId: string | null = null;
+async function approver() {
+  if (!approverId) approverId = (await createUser({ role: "staff", name: "Approver", phone: null })).id;
+  return approverId;
+}
+
+/**
+ * Full visit: the customer scans, a Palm Staff member approves. Returns the
+ * approval result when the scan was accepted, otherwise the scan result.
+ */
+export async function scan(customerId: string, qr: { sessionId: string; tokenHash: string }, idem = randomUUID()) {
+  const r = await requestScan(customerId, qr, idem);
+  if (r.code !== "APPROVAL_PENDING") return r;
+  return decide(await approver(), r.request_id, true);
 }
 
 /**
@@ -122,10 +143,10 @@ export async function shiftVisitsBack(customerId: string, days: number) {
   }
 }
 
-/** Gives a customer n points by awarding n visits on n distinct past days. */
+/** Gives a customer n points by approving n visits on n distinct past days. */
 export async function earnPoints(customerId: string, staffId: string, n: number) {
-  const qr = await issueQr(staffId);
   for (let i = 0; i < n; i++) {
+    const qr = await issueQr(staffId);
     const r = await scan(customerId, qr);
     if (r.code !== "POINT_AWARDED") throw new Error(`earnPoints failed at ${i}: ${JSON.stringify(r)}`);
     await shiftVisitsBack(customerId, 1);

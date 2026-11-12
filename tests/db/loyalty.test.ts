@@ -11,6 +11,8 @@ import {
   pool,
   rpc,
   scan,
+  requestScan,
+  decide,
   shiftVisitsBack,
 } from "./helpers";
 import { createQrToken } from "@/lib/qr/token";
@@ -114,7 +116,7 @@ describe("visit QR scanning", () => {
     const qr = await issueQr(staff.id);
     expect((await scan(c.id, qr)).code).toBe("POINT_AWARDED");
     await shiftVisitsBack(c.id, 1);
-    expect((await scan(c.id, qr)).code).toBe("POINT_AWARDED");
+    expect((await scan(c.id, await issueQr(staff.id))).code).toBe("POINT_AWARDED");
     expect((await account(c.id)).current_points).toBe(2);
   });
 
@@ -136,7 +138,7 @@ describe("visit QR scanning", () => {
     expect((await scan(c.id, wrongHash)).code).toBe("QR_INVALID");
     const unknown = createQrToken(TEST_SECRET, LOCATION_ID);
     expect((await scan(c.id, unknown)).code).toBe("QR_INVALID");
-    const wrongLocation = await rpc("service_role", null, "select public.award_qr_visit($1,$2,$3,$4,$5)", [
+    const wrongLocation = await rpc("service_role", null, "select public.request_qr_visit($1,$2,$3,$4,$5)", [
       c.id,
       qr.sessionId,
       qr.tokenHash,
@@ -172,10 +174,10 @@ describe("visit QR scanning", () => {
     const c = await createUser();
     const qr = await issueQr(staff.id);
     await expect(
-      rpc("anon", null, "select public.award_qr_visit($1,$2,$3,$4,$5)", [c.id, qr.sessionId, qr.tokenHash, LOCATION_ID, randomUUID()]),
+      rpc("anon", null, "select public.request_qr_visit($1,$2,$3,$4,$5)", [c.id, qr.sessionId, qr.tokenHash, LOCATION_ID, randomUUID()]),
     ).rejects.toThrow(/permission denied/);
     await expect(
-      rpc("authenticated", c.id, "select public.award_qr_visit($1,$2,$3,$4,$5)", [c.id, qr.sessionId, qr.tokenHash, LOCATION_ID, randomUUID()]),
+      rpc("authenticated", c.id, "select public.request_qr_visit($1,$2,$3,$4,$5)", [c.id, qr.sessionId, qr.tokenHash, LOCATION_ID, randomUUID()]),
     ).rejects.toThrow(/permission denied/);
     await expect(
       rpc("authenticated", c.id, "select public._award_point($1, $2, null, 'staff_assisted', $1, null, null)", [c.id, LOCATION_ID]),
@@ -195,19 +197,23 @@ describe("visit QR scanning", () => {
       "update public.qr_sessions set issued_at = now() - interval '5 minutes', expires_at = now() - interval '1 second' where id = $1",
       [qr.sessionId],
     );
-    const retry = await scan(c.id, qr, key);
+    const retry = await requestScan(c.id, qr, key);
     expect(retry.code).toBe("POINT_AWARDED");
-    expect(retry.replayed).toBe(true);
     expect((await account(c.id)).current_points).toBe(1);
   });
 
-  it("17: concurrent scans cannot award duplicate points", async () => {
+  it("17: concurrent scans and approvals cannot award duplicate points", async () => {
     const c = await createUser();
     const qr = await issueQr(staff.id);
-    const results = await Promise.all(Array.from({ length: 12 }, () => scan(c.id, qr)));
-    const awarded = results.filter((r) => r.code === "POINT_AWARDED");
-    expect(awarded).toHaveLength(1);
-    expect(results.every((r) => ["POINT_AWARDED", "ALREADY_COLLECTED_TODAY"].includes(r.code as string))).toBe(true);
+    const scans = await Promise.all(Array.from({ length: 12 }, () => requestScan(c.id, qr)));
+    expect(scans.every((r) => r.code === "APPROVAL_PENDING")).toBe(true);
+    expect(new Set(scans.map((r) => r.request_id)).size).toBe(1);
+    const staff2 = await createUser({ role: "staff" });
+    const decisions = await Promise.all(
+      Array.from({ length: 8 }, (_, i) => decide(i % 2 ? staff.id : staff2.id, scans[0].request_id, true)),
+    );
+    expect(decisions.filter((r) => r.code === "POINT_AWARDED")).toHaveLength(1);
+    expect(decisions.filter((r) => r.code === "ALREADY_DECIDED")).toHaveLength(7);
     expect((await account(c.id)).current_points).toBe(1);
     const { rows } = await pool.query("select count(*)::int n from public.visits where customer_id = $1", [c.id]);
     expect(rows[0].n).toBe(1);
@@ -233,7 +239,7 @@ describe("visit QR scanning", () => {
       "select result_code from public.scan_attempts where customer_id = $1 order by id",
       [c.id],
     );
-    expect(rows.map((r) => r.result_code)).toEqual(["POINT_AWARDED", "ALREADY_COLLECTED_TODAY"]);
+    expect(rows.map((r) => r.result_code)).toEqual(["APPROVAL_PENDING", "ALREADY_COLLECTED_TODAY"]);
   });
 });
 
@@ -268,7 +274,7 @@ describe("rewards", () => {
     expect(rewards[0].cycle_number).toBe(1);
 
     await shiftVisitsBack(c.id, 1);
-    const blocked = await scan(c.id, qr);
+    const blocked = await scan(c.id, await issueQr(staff.id));
     expect(blocked.code).toBe("REWARD_PENDING_REDEMPTION");
     expect((await account(c.id)).current_points).toBe(15);
     expect(await rewardFor(c.id)).toHaveLength(1);
@@ -422,6 +428,105 @@ describe("rewards", () => {
     expect(a).toMatchObject({ current_points: 0, cycle_number: 2 });
     const [after] = await rewardFor(c.id);
     expect(after.status).toBe("cancelled");
+  });
+});
+
+describe("Palm Staff approval", () => {
+  it("no point is added until a Palm Staff member approves", async () => {
+    const c = await createUser();
+    const r = await requestScan(c.id, await issueQr(staff.id));
+    expect(r.code).toBe("APPROVAL_PENDING");
+    expect((await account(c.id)).current_points).toBe(0);
+    const ok = await decide(staff.id, r.request_id, true);
+    expect(ok.code).toBe("POINT_AWARDED");
+    expect((await account(c.id)).current_points).toBe(1);
+    const { rows } = await pool.query("select status, decided_by, visit_id from public.visit_requests where id = $1", [r.request_id]);
+    expect(rows[0]).toMatchObject({ status: "approved", decided_by: staff.id });
+    expect(rows[0].visit_id).toBeTruthy();
+  });
+
+  it("each code works for one Palm Fren only", async () => {
+    const a = await createUser();
+    const b = await createUser();
+    const qr = await issueQr(staff.id);
+    expect((await requestScan(a.id, qr)).code).toBe("APPROVAL_PENDING");
+    expect((await requestScan(b.id, qr)).code).toBe("QR_USED");
+    const { rows } = await pool.query("select consumed_by from public.qr_sessions where id = $1", [qr.sessionId]);
+    expect(rows[0].consumed_by).toBe(a.id);
+  });
+
+  it("customers cannot approve their own visit", async () => {
+    const c = await createUser();
+    const r = await requestScan(c.id, await issueQr(staff.id));
+    expect((await decide(c.id, r.request_id, true)).code).toBe("FORBIDDEN");
+    await expect(
+      rpc("authenticated", c.id, "select public.request_qr_visit($1,$2,$3,$4,$5)", [c.id, randomUUID(), "0".repeat(64), LOCATION_ID, randomUUID()]),
+    ).rejects.toThrow(/permission denied/);
+    expect((await account(c.id)).current_points).toBe(0);
+  });
+
+  it("a declined visit adds nothing and the guest can scan a new code", async () => {
+    const c = await createUser();
+    const r = await requestScan(c.id, await issueQr(staff.id));
+    expect((await decide(staff.id, r.request_id, false)).code).toBe("VISIT_DECLINED");
+    expect((await account(c.id)).current_points).toBe(0);
+    const again = await requestScan(c.id, await issueQr(staff.id));
+    expect(again.code).toBe("APPROVAL_PENDING");
+  });
+
+  it("requests lapse after 15 minutes", async () => {
+    const c = await createUser();
+    const r = await requestScan(c.id, await issueQr(staff.id));
+    await pool.query("update public.visit_requests set created_at = now() - interval '16 minutes' where id = $1", [r.request_id]);
+    expect((await decide(staff.id, r.request_id, true)).code).toBe("REQUEST_EXPIRED");
+    expect((await account(c.id)).current_points).toBe(0);
+  });
+
+  it("customers see only their own requests; staff see all", async () => {
+    const a = await createUser();
+    const b = await createUser();
+    await requestScan(a.id, await issueQr(staff.id));
+    await requestScan(b.id, await issueQr(staff.id));
+    const mine = await as("authenticated", a.id, (cl) => cl.query("select customer_id from public.visit_requests"));
+    expect(mine.rows.every((r) => r.customer_id === a.id)).toBe(true);
+    const all = await as("authenticated", staff.id, (cl) => cl.query("select customer_id from public.visit_requests where customer_id = any($1)", [[a.id, b.id]]));
+    expect(all.rows).toHaveLength(2);
+  });
+});
+
+describe("Palm Staff sign-up requests", () => {
+  async function signUp(type: string) {
+    const id = randomUUID();
+    await pool.query("insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)", [
+      id,
+      `req-${id.slice(0, 8)}@example.test`,
+      JSON.stringify({ full_name: "Staff Hopeful", account_type: type }),
+    ]);
+    const { rows } = await pool.query("select role, staff_request from public.profiles where id = $1", [id]);
+    return { id, ...rows[0] };
+  }
+
+  it("choosing Palm Staff creates a request but no staff access", async () => {
+    const u = await signUp("staff");
+    expect(u).toMatchObject({ role: "customer", staff_request: "pending" });
+    const fren = await signUp("fren");
+    expect(fren).toMatchObject({ role: "customer", staff_request: null });
+  });
+
+  it("only an admin can approve, which grants staff access", async () => {
+    const u = await signUp("staff");
+    expect((await rpc("authenticated", staff.id, "select public.admin_decide_staff_request($1, true)", [u.id])).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", u.id, "select public.admin_decide_staff_request($1, true)", [u.id])).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", admin.id, "select public.admin_decide_staff_request($1, true)", [u.id])).code).toBe("OK");
+    const { rows } = await pool.query("select role, staff_request from public.profiles where id = $1", [u.id]);
+    expect(rows[0]).toMatchObject({ role: "staff", staff_request: "approved" });
+  });
+
+  it("a declined request keeps the account as a Palm Fren", async () => {
+    const u = await signUp("staff");
+    expect((await rpc("authenticated", admin.id, "select public.admin_decide_staff_request($1, false)", [u.id])).code).toBe("OK");
+    const { rows } = await pool.query("select role, staff_request from public.profiles where id = $1", [u.id]);
+    expect(rows[0]).toMatchObject({ role: "customer", staff_request: "declined" });
   });
 });
 

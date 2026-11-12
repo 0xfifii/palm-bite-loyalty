@@ -39,6 +39,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <p className="mt-1 text-muted">Your next Palm Bite treat is getting closer.</p>
       </div>
 
+      {profile.staff_request === "pending" && profile.role === "customer" && (
+        <div className="mt-4">
+          <Notice tone="info">Your Palm Staff request is waiting for an admin to approve it. You can use the app as a Palm Fren meanwhile.</Notice>
+        </div>
+      )}
+
       {sp.password === "updated" && (
         <div className="mt-4">
           <Notice tone="success">Your password has been updated.</Notice>

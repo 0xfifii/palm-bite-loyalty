@@ -12,6 +12,9 @@ export const metadata: Metadata = { title: "QR display" };
 
 const RESULT_LABELS: Record<string, { label: string; tone: "sage" | "peach" | "danger" | "muted" }> = {
   POINT_AWARDED: { label: "Point awarded", tone: "sage" },
+  APPROVAL_PENDING: { label: "Scanned, sent for approval", tone: "sage" },
+  QR_USED: { label: "Code already used", tone: "peach" },
+  REQUEST_EXPIRED: { label: "Approval timed out", tone: "muted" },
   POINT_AWARDED_REPLAY: { label: "Retry, no new point", tone: "muted" },
   ALREADY_COLLECTED_TODAY: { label: "Already collected", tone: "peach" },
   REWARD_PENDING_REDEMPTION: { label: "Reward waiting", tone: "peach" },

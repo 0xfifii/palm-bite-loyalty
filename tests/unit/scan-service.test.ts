@@ -9,31 +9,31 @@ const SECRET = "unit-test-secret-that-is-long-enough-123";
 const LOC = "00000000-0000-4000-8000-000000000001";
 
 function deps(overrides: Partial<ScanDeps> = {}) {
-  const award = vi.fn(async () => ({ code: "POINT_AWARDED", replayed: false, reward_unlocked: false, account: { points: 3, cycle: 1, total_visits: 3, rewards_redeemed: 0 } }));
+  const award = vi.fn(async () => ({ code: "APPROVAL_PENDING", request_id: "22222222-2222-4222-8222-222222222222", account: { points: 3, cycle: 1, total_visits: 3, rewards_redeemed: 0 } }));
   const logAttempt = vi.fn(async () => undefined);
   const d: ScanDeps = {
     getUserId: async () => "11111111-1111-4111-8111-111111111111",
     rateLimit: async () => true,
-    award,
+    request: award,
     logAttempt,
     secrets: [SECRET],
     locationId: LOC,
     ...overrides,
   };
-  return { d, award: (overrides.award as typeof award) ?? award, logAttempt };
+  return { d, award: (overrides.request as typeof award) ?? award, logAttempt };
 }
 
 const input = (body: unknown) => ({ body, ipHash: "iphash", userAgent: "test" });
 
 describe("processScan", () => {
-  it("awards a point for a valid token and passes only server-derived values", async () => {
+  it("creates an approval request for a valid token and passes only server-derived values", async () => {
     const { d, award } = deps();
     const t = createQrToken(SECRET, LOC);
     const key = randomUUID();
     const res = await processScan(d, input({ token: buildScanUrl("https://pb.example", t.token), idempotencyKey: key }));
-    expect(res.code).toBe("POINT_AWARDED");
-    expect(res.title).toBe("+1 POINT!");
-    expect(res.message).toBe(SCAN_MESSAGES.POINT_AWARDED.body);
+    expect(res.code).toBe("APPROVAL_PENDING");
+    expect(res.requestId).toBe("22222222-2222-4222-8222-222222222222");
+    expect(res.message).toBe(SCAN_MESSAGES.APPROVAL_PENDING.body);
     expect(award).toHaveBeenCalledWith(
       expect.objectContaining({ sessionId: t.sessionId, tokenHash: t.tokenHash, locationId: LOC, idempotencyKey: key }),
     );
@@ -80,16 +80,16 @@ describe("processScan", () => {
   });
 
   it("never reports success when the database call fails", async () => {
-    const { d } = deps({ award: vi.fn(async () => { throw new Error("network"); }) });
+    const { d } = deps({ request: vi.fn(async () => { throw new Error("network"); }) });
     const t = createQrToken(SECRET, LOC);
     const res = await processScan(d, input({ token: t.token, idempotencyKey: randomUUID() }));
     expect(res.code).toBe("TEMPORARY_ERROR");
   });
 
-  it.each(["ALREADY_COLLECTED_TODAY", "QR_EXPIRED", "QR_REVOKED", "QR_INVALID", "REWARD_PENDING_REDEMPTION", "ACCOUNT_SUSPENDED"])(
+  it.each(["ALREADY_COLLECTED_TODAY", "QR_EXPIRED", "QR_REVOKED", "QR_INVALID", "QR_USED", "REWARD_PENDING_REDEMPTION", "ACCOUNT_SUSPENDED"])(
     "passes through database result %s with its message",
     async (code) => {
-      const { d } = deps({ award: vi.fn(async () => ({ code })) });
+      const { d } = deps({ request: vi.fn(async () => ({ code })) });
       const t = createQrToken(SECRET, LOC);
       const res = await processScan(d, input({ token: t.token, idempotencyKey: randomUUID() }));
       expect(res.code).toBe(code);
@@ -98,7 +98,7 @@ describe("processScan", () => {
   );
 
   it("maps unknown database results to TEMPORARY_ERROR", async () => {
-    const { d } = deps({ award: vi.fn(async () => ({ code: "SOMETHING_ELSE" })) });
+    const { d } = deps({ request: vi.fn(async () => ({ code: "SOMETHING_ELSE" })) });
     const t = createQrToken(SECRET, LOC);
     const res = await processScan(d, input({ token: t.token, idempotencyKey: randomUUID() }));
     expect(res.code).toBe("TEMPORARY_ERROR");

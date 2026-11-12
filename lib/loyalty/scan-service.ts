@@ -13,8 +13,10 @@ import { extractScannedToken } from "@/lib/qr/parse";
  * 3. request shape and idempotency key
  * 4. token structure and HMAC signature (rejects tampering before any DB work)
  * 5. token location matches this Palm Bite location
- * 6. database: session exists, hash matches, not revoked, not expired,
- *    one point per business-local day, no open reward, atomic award
+ * 6. database: session exists, hash matches, not revoked, not used by
+ *    another Palm Fren, not expired, one point per business-local day, no
+ *    open reward. A valid scan creates a pending request; the point is added
+ *    only when a Palm Staff member approves it.
  */
 
 export const scanRequestSchema = z.object({
@@ -26,7 +28,7 @@ export type ScanResponse = {
   code: ScanCode;
   title: string;
   message: string;
-  replayed?: boolean;
+  requestId?: string;
   rewardUnlocked?: boolean;
   account?: { points: number; cycle: number; total_visits: number; rewards_redeemed: number };
 };
@@ -34,7 +36,7 @@ export type ScanResponse = {
 export type ScanDeps = {
   getUserId: () => Promise<string | null>;
   rateLimit: (key: string, limit: number, windowSeconds: number) => Promise<boolean>;
-  award: (args: {
+  request: (args: {
     customerId: string;
     sessionId: string;
     tokenHash: string;
@@ -89,7 +91,7 @@ export async function processScan(
 
   let result: Record<string, unknown>;
   try {
-    result = await deps.award({
+    result = await deps.request({
       customerId: userId,
       sessionId: verified.payload.sid,
       tokenHash: verified.tokenHash,
@@ -99,8 +101,8 @@ export async function processScan(
       userAgent: input.userAgent,
     });
   } catch {
-    // The client retries with the same idempotency key, so a commit that
-    // happened before the error is returned as POINT_AWARDED, never doubled.
+    // The client retries with the same idempotency key, so a request that
+    // was already created is returned, never duplicated.
     return respond("TEMPORARY_ERROR");
   }
 
@@ -108,8 +110,7 @@ export async function processScan(
   const account = result?.account as ScanResponse["account"] | undefined;
   return respond(code, {
     account,
-    replayed: result?.replayed === true,
-    rewardUnlocked: result?.reward_unlocked === true,
+    requestId: typeof result?.request_id === "string" ? result.request_id : undefined,
   });
 }
 

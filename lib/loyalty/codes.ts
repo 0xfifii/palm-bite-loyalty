@@ -13,6 +13,10 @@ export const SCAN_CODES = [
   "TEMPORARY_ERROR",
   "ACCOUNT_SUSPENDED",
   "RATE_LIMITED",
+  "APPROVAL_PENDING",
+  "QR_USED",
+  "VISIT_REJECTED",
+  "REQUEST_EXPIRED",
 ] as const;
 
 export type ScanCode = (typeof SCAN_CODES)[number];
@@ -72,6 +76,26 @@ export const SCAN_MESSAGES: Record<ScanCode, ScanMessage> = {
     body: "Too many attempts in a short time. Please wait a minute and try again.",
     tone: "error",
   },
+  APPROVAL_PENDING: {
+    title: "Waiting for Palm Staff",
+    body: "Show this screen at the counter. Your point is added as soon as a Palm Staff member approves.",
+    tone: "info",
+  },
+  QR_USED: {
+    title: "Code already used",
+    body: "Each code works for one Palm Fren. Please scan the new code on the screen.",
+    tone: "error",
+  },
+  VISIT_REJECTED: {
+    title: "Visit not approved",
+    body: "A Palm Staff member didn't approve this visit. Please speak to them if you think this is a mistake.",
+    tone: "error",
+  },
+  REQUEST_EXPIRED: {
+    title: "Approval timed out",
+    body: "Your visit wasn't approved in time. Please scan the new code on the screen.",
+    tone: "error",
+  },
 };
 
 export const CAMERA_ERROR_MESSAGE =
@@ -109,6 +133,9 @@ export const ACTION_MESSAGES: Record<string, string> = {
   INVALID_ADJUSTMENT: "That adjustment is not allowed.",
   REASON_REQUIRED: "Please give a reason of at least 5 characters.",
   REWARD_PENDING_REDEMPTION: "This customer has an open reward. Redeem or void it first.",
+  REQUEST_NOT_FOUND: "That visit request no longer exists.",
+  ALREADY_DECIDED: "Another Palm Staff member already handled this visit.",
+  NO_PENDING_REQUEST: "This person has no pending staff request.",
   CANNOT_CHANGE_SELF: "You cannot change your own account this way.",
   INVALID_TIMEZONE: "That timezone is not recognised.",
   INVALID_TTL: "QR lifetime must be between 30 and 300 seconds.",

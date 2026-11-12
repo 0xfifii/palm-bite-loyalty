@@ -11,6 +11,7 @@ export type Profile = {
   role: UserRole;
   status: AccountStatus;
   created_at: string;
+  staff_request?: "pending" | "approved" | "declined" | null;
 };
 
 export type LoyaltyAccount = {

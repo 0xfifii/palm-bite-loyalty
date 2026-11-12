@@ -16,6 +16,7 @@ type Phase =
   | { name: "intro" }
   | { name: "camera" }
   | { name: "verifying" }
+  | { name: "waiting"; requestId: string }
   | { name: "result"; result: ScanResponse }
   | { name: "notPalmBite" };
 
@@ -98,12 +99,46 @@ export function ScanExperience({
         keys.current.set(token, key);
       }
       const result = await postScan(token, key);
-      setPhase({ name: "result", result });
       busy.current = false;
+      if (result.code === "APPROVAL_PENDING" && result.requestId) {
+        setPhase({ name: "waiting", requestId: result.requestId });
+        return;
+      }
+      setPhase({ name: "result", result });
       if (result.code === "POINT_AWARDED") router.refresh();
     },
     [router],
   );
+
+  // While waiting, check every 2 seconds whether Palm Staff have decided.
+  const waitingId = phase.name === "waiting" ? phase.requestId : null;
+  useEffect(() => {
+    if (!waitingId) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/scan/status?id=${waitingId}`, { cache: "no-store", credentials: "same-origin" });
+        if (res.ok) {
+          const data = (await res.json()) as ScanResponse;
+          if (stopped) return;
+          if (data.code !== "APPROVAL_PENDING") {
+            setPhase({ name: "result", result: data });
+            if (data.code === "POINT_AWARDED") router.refresh();
+            return;
+          }
+        }
+      } catch {
+        // keep waiting; the network may come back
+      }
+      if (!stopped) timer = setTimeout(poll, 2000);
+    };
+    timer = setTimeout(poll, 1500);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [waitingId, router]);
 
   // Arrived from the phone's own camera app with ?t=<token>.
   useEffect(() => {
@@ -159,7 +194,7 @@ export function ScanExperience({
               </li>
               <li className="flex gap-3">
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-cream/12 text-sm font-semibold">3</span>
-                Hold the code inside the frame. We add your point once it&apos;s verified.
+                Hold the code inside the frame, then show your screen to Palm Staff to approve your point.
               </li>
             </ol>
           </div>
@@ -223,6 +258,25 @@ export function ScanExperience({
           </div>
           <p className="type-heading mt-6 text-xl">Verifying your visit</p>
           <p className="mt-1 text-muted">This only takes a moment.</p>
+        </section>
+      )}
+
+      {phase.name === "waiting" && (
+        <section className="flex flex-1 flex-col items-center justify-center text-center" aria-live="polite">
+          <div className="relative grid size-32 place-items-center">
+            <span className="animate-ring absolute inset-0 rounded-full bg-peach/50" />
+            <span className="grid size-28 place-items-center rounded-full bg-olive-deep text-peach">
+              <Mark height={50} label="" />
+            </span>
+          </div>
+          <p className="type-heading mt-7 text-[1.6rem]">{SCAN_MESSAGES.APPROVAL_PENDING.title}</p>
+          <p className="mt-2 max-w-xs leading-relaxed text-muted">{SCAN_MESSAGES.APPROVAL_PENDING.body}</p>
+          <div className="mt-6 w-full rounded-[var(--radius-card)] bg-surface px-5 py-4">
+            <p className="text-sm text-muted">Palm Fren</p>
+            <p className="type-heading mt-1 text-2xl">{memberName}</p>
+            {memberPhone && <p className="tabular text-sm text-muted">Phone ending {memberPhone.slice(-4)}</p>}
+          </div>
+          <p className="mt-4 text-sm text-muted">Keep this screen open. It updates by itself.</p>
         </section>
       )}
 

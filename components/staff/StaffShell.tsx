@@ -6,7 +6,8 @@ import { Wordmark } from "@/components/brand/Logo";
 import { Icon, type IconName } from "@/components/ui/Icon";
 
 const tabs: { href: string; label: string; icon: IconName }[] = [
-  { href: "/staff", label: "Redeem", icon: "gift" },
+  { href: "/staff", label: "Approvals", icon: "check" },
+  { href: "/staff/redeem", label: "Redeem", icon: "gift" },
   { href: "/staff/check-in", label: "Check in", icon: "users" },
   { href: "/staff/qr", label: "Visit QR", icon: "qr" },
 ];
@@ -19,7 +20,7 @@ export function StaffShell({ isAdmin, name, children }: { isAdmin: boolean; name
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
           <div className="flex items-center gap-3">
             <Wordmark height={22} className="text-peach" />
-            <span className="rounded-full bg-cream/12 px-2.5 py-1 text-xs font-semibold">Staff</span>
+            <span className="rounded-full bg-cream/12 px-2.5 py-1 text-xs font-semibold">Palm Staff</span>
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden text-cream/75 sm:inline">{name}</span>

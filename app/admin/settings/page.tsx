@@ -6,6 +6,7 @@ import { ActionForm } from "@/components/admin/ActionForm";
 import { SubmitButton } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { updateSettings } from "@/app/admin/actions";
+import { StaffRequests } from "@/components/admin/StaffRequests";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -62,8 +63,12 @@ export default async function SettingsPage() {
         </Panel>
 
         <Panel title="Team access">
+          <h3 className="mb-2 font-semibold">Palm Staff requests</h3>
+          <div className="mb-6">
+            <StaffRequests timeZone={current} />
+          </div>
           <p className="mb-4 text-sm leading-relaxed text-muted">
-            To add a team member, ask them to create a normal account, then open their profile from Customers and change the role.
+            New team members sign up as Palm Staff and appear above for approval. You can also change anyone&apos;s role from their profile in Customers.
           </p>
           <Table head={["Name", "Role", "Status"]} empty="No staff accounts yet.">
             {(team ?? []).map((t) => (

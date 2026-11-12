@@ -8,8 +8,9 @@ export default function StaffQrPage() {
     <div className="max-w-2xl">
       <h1 className="type-heading text-[1.9rem]">Visit QR display</h1>
       <p className="mt-2 leading-relaxed text-muted">
-        Open the display on the tablet or screen at the counter. It shows a new signed code every minute, so a photo of an old code
-        won&apos;t work later. Keep the device plugged in and signed in with a staff account.
+        Open the display on the tablet or screen at the counter. Each code works for one Palm Fren and changes as soon as it&apos;s
+        scanned (or after a minute). Names of guests who scanned appear beside the code: tap Approve to add their point. Keep the
+        device plugged in and signed in with a Palm Staff account.
       </p>
       <div className="mt-6">
         <ButtonLink href="/display" variant="olive" size="lg" icon="qr" trailingArrow>

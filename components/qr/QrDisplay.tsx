@@ -4,18 +4,21 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Wordmark } from "@/components/brand/Logo";
 import { Icon } from "@/components/ui/Icon";
+import { VisitApprovals } from "@/components/staff/VisitApprovals";
 
 type Session = { svg: string; expiresAt: number; ttl: number; sessionId: string; offset: number };
 
 /**
  * In-store visit QR display. Each code is minted by the server, signed, valid
- * for the configured lifetime (60 seconds by default) and replaced
- * automatically before it expires. An expired code is never left on screen.
+ * for the configured lifetime (60 seconds by default) and works for one Palm
+ * Fren only: as soon as someone scans it, a new code replaces it. Pending
+ * scans appear beside the code for Palm Staff to approve.
  */
 export function QrDisplay({ exitHref }: { exitHref: string }) {
   const [session, setSession] = useState<Session | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const [status, setStatus] = useState<"loading" | "live" | "reconnecting" | "forbidden">("loading");
+  const [justUsed, setJustUsed] = useState(false);
   const inflight = useRef(false);
   const failures = useRef(0);
 
@@ -71,6 +74,42 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
     return () => clearTimeout(t);
   }, [session, remainingMs, lead, status, mint]);
 
+  // Single-use codes: once a Palm Fren claims this code, show a new one.
+  const liveId = status === "live" ? session?.sessionId : undefined;
+  useEffect(() => {
+    if (!liveId) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const check = async () => {
+      try {
+        const res = await fetch(`/api/qr/status?sid=${liveId}`, { cache: "no-store", credentials: "same-origin" });
+        if (res.ok) {
+          const data = (await res.json()) as { consumed: boolean; revoked: boolean };
+          if (!stopped && (data.consumed || data.revoked)) {
+            setJustUsed(data.consumed);
+            void mint();
+            return;
+          }
+        }
+      } catch {
+        // check again shortly
+      }
+      if (!stopped) timer = setTimeout(check, 1500);
+    };
+    timer = setTimeout(check, 1500);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, [liveId, mint]);
+
+  // Brief "new code" note after a scan.
+  useEffect(() => {
+    if (!justUsed) return;
+    const t = setTimeout(() => setJustUsed(false), 4000);
+    return () => clearTimeout(t);
+  }, [justUsed]);
+
   // Keep the display awake where supported.
   useEffect(() => {
     let lock: { release: () => Promise<void> } | null = null;
@@ -91,7 +130,7 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
   const C = 2 * Math.PI * R;
 
   return (
-    <main className="relative flex min-h-dvh flex-col items-center bg-olive px-6 py-8 text-cream">
+    <main className="relative flex min-h-dvh flex-col items-center bg-olive px-6 py-8 pb-12 text-cream">
       <div className="absolute top-4 right-4 flex gap-2">
         <button
           onClick={() => document.documentElement.requestFullscreen?.().catch(() => undefined)}
@@ -108,11 +147,11 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
         <Wordmark height={44} />
       </div>
 
-      <h1 className="type-display mt-8 max-w-4xl text-center text-[clamp(2.2rem,6vw,4.6rem)] text-cream uppercase">
+      <h1 className="type-display mt-6 max-w-4xl text-center text-[clamp(2rem,5vw,4rem)] text-cream uppercase">
         Scan to Collect Your Palm Bite Point.
       </h1>
 
-      <div className="mt-10 flex flex-1 flex-col items-center gap-10 lg:flex-row lg:items-center lg:gap-16">
+      <div className="mt-10 flex flex-1 flex-col items-center gap-10 lg:flex-row lg:items-start lg:gap-12">
         <div className="relative rounded-[2.25rem] bg-white p-5 shadow-lift">
           <div className="relative size-[min(70vw,56vh,460px)]">
             {status !== "forbidden" && session && !expired ? (
@@ -135,7 +174,7 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
           </div>
         </div>
 
-        <div className="flex max-w-sm flex-col items-center gap-8 lg:items-start">
+        <div className="flex max-w-sm flex-col items-center gap-7 lg:items-start">
           <div className="flex items-center gap-4" aria-live="off">
             <svg viewBox="0 0 100 100" className="size-24 -rotate-90" aria-hidden="true">
               <circle cx="50" cy="50" r={R} stroke="currentColor" strokeOpacity="0.18" strokeWidth="8" fill="none" />
@@ -154,7 +193,7 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
             </svg>
             <div>
               <p className="type-heading tabular text-4xl">{session && !expired ? `${seconds}s` : "--"}</p>
-              <p className="text-sm text-cream/75">until this code refreshes</p>
+              <p className="text-sm text-cream/75">{justUsed ? "Code used. Here's a fresh one." : "until this code refreshes"}</p>
             </div>
           </div>
 
@@ -162,7 +201,7 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
             {[
               "Open Palm Bite Loyalty on your phone.",
               "Tap Scan & Earn.",
-              "Point your camera at this code.",
+              "Scan this code, then show your phone to Palm Staff.",
             ].map((step, i) => (
               <li key={step} className="flex items-center gap-4">
                 <span className="grid size-10 shrink-0 place-items-center rounded-full bg-peach font-bold text-olive-night">{i + 1}</span>
@@ -172,8 +211,12 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
           </ol>
 
           <p className="flex items-center gap-2 text-sm text-cream/75">
-            <Icon name="shield" className="size-4" /> One point per guest per day. Codes change every minute.
+            <Icon name="shield" className="size-4" /> One code per Palm Fren, one point per day.
           </p>
+        </div>
+
+        <div className="w-full max-w-sm">
+          <VisitApprovals tone="dark" />
         </div>
       </div>
     </main>

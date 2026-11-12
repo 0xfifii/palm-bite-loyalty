@@ -170,3 +170,20 @@ export async function saveDrink(_prev: ActionState, formData: FormData): Promise
   if (isNew) redirect(`/admin/drinks/${data.id}?saved=1`);
   return { ok: true, message: "Drink saved." };
 }
+
+export async function decideStaffRequest(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase } = await admin();
+  const parsed = z
+    .object({ userId: z.uuid(), decision: z.enum(["approve", "decline"]) })
+    .safeParse({ userId: formData.get("userId"), decision: formData.get("decision") });
+  if (!parsed.success) return { error: "Invalid request." };
+  const { data, error } = await supabase.rpc("admin_decide_staff_request", {
+    p_user: parsed.data.userId,
+    p_approve: parsed.data.decision === "approve",
+  });
+  if (error) return { error: actionMessage("TEMPORARY_ERROR") };
+  return done(data as RpcResult, parsed.data.decision === "approve" ? "Approved. They now have Palm Staff access." : "Request declined.", [
+    "/admin/settings",
+    "/admin",
+  ]);
+}

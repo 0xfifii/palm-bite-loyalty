@@ -36,6 +36,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   if (!parsed.success) return { fields: fieldErrors(parsed.error), values };
 
   const { fullName, phone, email, password } = parsed.data;
+  const accountType = formData.get("accountType") === "staff" ? "staff" : "fren";
 
   const { data: conflicts } = await createAdminClient().rpc("registration_conflicts", {
     p_email: email,
@@ -57,7 +58,8 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     email,
     password,
     options: {
-      data: { full_name: fullName, phone },
+      // account_type only records a request; staff access needs admin approval.
+      data: { full_name: fullName, phone, account_type: accountType },
       emailRedirectTo: `${serverEnv().NEXT_PUBLIC_SITE_URL}/auth/confirm?next=/home`,
     },
   });

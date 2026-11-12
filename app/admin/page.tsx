@@ -34,11 +34,15 @@ const ACTION_LABELS: Record<string, string> = {
   "qr.revoked": "QR revoked",
   "report.viewed": "Report exported",
   "account.bootstrap_admin": "Administrator created",
+  "visit.approved": "Visit approved",
+  "visit.declined": "Visit declined",
+  "staff_request.approved": "Staff request approved",
+  "staff_request.declined": "Staff request declined",
 };
 
 export default async function AdminOverview() {
   const { supabase } = await requireRole(["admin"], "/admin");
-  const [{ data: overview }, { data: activity }] = await Promise.all([
+  const [{ data: overview }, { data: activity }, { count: staffRequests }] = await Promise.all([
     supabase.rpc("admin_overview"),
     supabase
       .from("audit_logs")
@@ -46,6 +50,7 @@ export default async function AdminOverview() {
       .neq("action", "report.viewed")
       .order("created_at", { ascending: false })
       .limit(12),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("staff_request", "pending"),
   ]);
   const o = overview as Overview | null;
   const tz = o?.business_timezone ?? "Africa/Lagos";
@@ -67,6 +72,12 @@ export default async function AdminOverview() {
           </>
         }
       />
+
+      {(staffRequests ?? 0) > 0 && (
+        <a href="/admin/settings" className="mb-6 block rounded-[var(--radius-card)] bg-peach p-4 font-semibold text-olive-night">
+          {staffRequests} Palm Staff {staffRequests === 1 ? "request is" : "requests are"} waiting for your approval. Review in Settings.
+        </a>
+      )}
 
       {!o || o.code !== "OK" ? (
         <Panel>
