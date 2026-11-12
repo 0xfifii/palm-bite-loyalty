@@ -23,8 +23,12 @@ let ineligibleDrinkId: string;
 beforeAll(async () => {
   staff = await createUser({ role: "staff", name: "Staff Member" });
   admin = await createUser({ role: "admin", name: "Admin User", phone: null });
+  // Test drinks of our own, so the tests do not depend on the live menu.
   const { rows } = await pool.query(
-    "select id, is_reward_eligible from public.drinks where is_active order by sort_order",
+    `insert into public.drinks (name, is_reward_eligible, customization) values
+       ('Test Reward Drink', true, '[{"name":"Milk","options":["Whole","Oat"],"multi":false}]'),
+       ('Test Paid Drink', false, '[]')
+     returning id, is_reward_eligible`,
   );
   drinkId = rows.find((r) => r.is_reward_eligible).id;
   ineligibleDrinkId = rows.find((r) => !r.is_reward_eligible).id;

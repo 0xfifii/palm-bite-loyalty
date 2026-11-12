@@ -131,7 +131,7 @@ npx supabase db push         # applies supabase/migrations in order
 
 Option B, SQL editor: run each file in `supabase/migrations` in filename order.
 
-Then, for development only, run `supabase/seed.sql` to add the six sample drinks. Each is named "Sample ..." and labelled Sample in the app. Do not run the seed in production; add the real menu in **Admin > Drinks menu** instead.
+`supabase/seed.sql` adds the Palm Bite drink menu (13 drinks). The quickest route is `supabase/setup-all.sql`, which runs every migration and the menu in one paste. If a project was set up earlier with the sample drinks, run `supabase/menu-update.sql` to swap them for the real menu.
 
 ### 3. Authentication settings
 

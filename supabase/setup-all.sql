@@ -1,6 +1,6 @@
 -- Palm Bite Loyalty: ONE-STEP SETUP
 -- Paste this whole file into Supabase > SQL Editor > New query, then click Run.
--- It creates every table, rule and security policy, plus sample drinks.
+-- It creates every table, rule and security policy, plus the Palm Bite drink menu.
 -- Run it only once, on a new empty project.
 
 
@@ -1971,24 +1971,20 @@ revoke execute on function public.admin_report(text, date, date) from public, an
 grant execute on function public.admin_report(text, date, date) to authenticated;
 
 -- ===================== seed.sql =====================
--- Development sample drinks.
--- These are clearly marked samples (is_sample = true, shown with a "Sample"
--- label in the app). They are NOT Palm Bite's real menu. Replace them from the
--- admin Drinks screen once the real menu and photography are available.
+-- Palm Bite drink menu.
+-- Edit drinks, photos, descriptions and options any time in Admin > Drinks menu.
 
-insert into public.drinks (name, description, category, image_url, accent_color, is_sample, sort_order, customization)
-values
-  ('Sample Iced Matcha Latte', 'Placeholder description. Replace with Palm Bite menu copy.', 'Matcha', null, '#9DB27C', true, 10,
-   '[{"name":"Milk","options":["Whole","Skim","Oat"],"multi":false},{"name":"Sweetener","options":["Honey","Agave","None"],"multi":false}]'),
-  ('Sample Iced Coffee', 'Placeholder description. Replace with Palm Bite menu copy.', 'Coffee', null, '#B08A6B', true, 20,
-   '[{"name":"Milk","options":["Whole","Oat","None"],"multi":false},{"name":"Extras","options":["Extra shot","Vanilla"],"multi":true}]'),
-  ('Sample Peach Iced Tea', 'Placeholder description. Replace with Palm Bite menu copy.', 'Tea', null, '#E9B08F', true, 30,
-   '[{"name":"Sweetness","options":["Regular","Less sweet","Unsweetened"],"multi":false}]'),
-  ('Sample Berry Smoothie', 'Placeholder description. Replace with Palm Bite menu copy.', 'Smoothies', null, '#B5677D', true, 40,
-   '[]'),
-  ('Sample Tropical Juice', 'Placeholder description. Replace with Palm Bite menu copy.', 'Juice', null, '#E8B54D', true, 50,
-   '[]'),
-  ('Sample Hot Chocolate', 'Placeholder description. Not reward eligible in this sample data.', 'Hot drinks', null, '#7A5240', true, 60,
-   '[]');
-
-update public.drinks set is_reward_eligible = false where name = 'Sample Hot Chocolate';
+insert into public.drinks (name, category, accent_color, sort_order, is_reward_eligible, is_sample) values
+  ('Palms Frappuccino',      'Drinks', '#8B6A4F', 10, true, false),
+  ('Mint Tea',               'Drinks', '#8FBF8A', 20, true, false),
+  ('Melis',                  'Drinks', '#C9A27E', 30, true, false),
+  ('Crips Love',             'Drinks', '#D98C8C', 40, true, false),
+  ('Matcha',                 'Drinks', '#9DB27C', 50, true, false),
+  ('Espresso',               'Drinks', '#5A3E2B', 60, true, false),
+  ('Caramel Velvet Latte',   'Drinks', '#C68B59', 70, true, false),
+  ('Caramel Velvet Matcha',  'Drinks', '#A8B47A', 80, true, false),
+  ('Our Latte',              'Drinks', '#D2B48C', 90, true, false),
+  ('Hibiscus Juice',         'Juices', '#A63A50', 110, true, false),
+  ('Pineapple Juice',        'Juices', '#E8C547', 120, true, false),
+  ('Apple Juice',            'Juices', '#C9D86A', 130, true, false),
+  ('Watermelon Juice',       'Juices', '#E86A6A', 140, true, false);
