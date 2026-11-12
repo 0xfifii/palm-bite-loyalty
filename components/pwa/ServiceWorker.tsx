@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import "@/lib/pwa/install";
 
 export function ServiceWorker() {
   useEffect(() => {

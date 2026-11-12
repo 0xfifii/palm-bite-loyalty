@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { RewardStatusBadge, Badge } from "@/components/ui/Badge";
 import { Notice } from "@/components/ui/Field";
 import { Mark } from "@/components/brand/Logo";
+import { InstallBanner } from "@/components/pwa/InstallBanner";
 import { firstName, formatDate, formatTime, formatVisitDate, initials } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Home" };
@@ -62,6 +63,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </ButtonLink>
         </div>
       )}
+
+      <InstallBanner />
 
       <section className="mt-10" aria-labelledby="menu-heading">
         <div className="flex items-end justify-between">

@@ -2,6 +2,7 @@ import { Wordmark } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { DrinkImage } from "@/components/drinks/DrinkImage";
 import { Splash } from "./Splash";
+import { InstallButton } from "@/components/pwa/InstallButton";
 
 export function Welcome() {
   return (
@@ -48,6 +49,7 @@ export function Welcome() {
             <ButtonLink href="/login" variant="outline" size="lg" full>
               Welcome Back
             </ButtonLink>
+            <InstallButton variant="light" className="w-full" />
           </div>
           <p className="mt-5 text-sm text-muted">One visit a day earns one point. Fifteen points earns a free drink.</p>
         </section>

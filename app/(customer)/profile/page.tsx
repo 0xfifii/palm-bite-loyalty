@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { requireUser, homeFor } from "@/lib/auth";
 import { loadCustomer } from "@/lib/loyalty/queries";
 import { ProfileForm } from "./ProfileForm";
-import { InstallGuide } from "@/components/pwa/InstallGuide";
+import { InstallButton } from "@/components/pwa/InstallButton";
 import { Icon } from "@/components/ui/Icon";
 import { formatDate, initials } from "@/lib/format";
 import { signOutAction } from "@/app/(auth)/actions";
@@ -71,7 +71,8 @@ export default async function ProfilePage() {
         <h2 id="install-heading" className="type-heading mb-2 text-lg">
           Get the app
         </h2>
-        <InstallGuide />
+        <p className="mb-3 text-sm leading-relaxed text-muted">Put Palm Bite on your home screen and open your card in one tap. If nothing appears below, the app is already installed.</p>
+        <InstallButton variant="dark" />
       </section>
 
       <form action={signOutAction} className="mt-6">
