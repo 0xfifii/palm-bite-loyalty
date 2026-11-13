@@ -20,6 +20,9 @@ const BLANK: Drink = {
   is_sample: false,
   customization: [],
   sort_order: 100,
+  price_naira: null,
+  item_type: "drink",
+  art: "iced",
 };
 
 export default async function EditDrinkPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string }> }) {
@@ -37,10 +40,10 @@ export default async function EditDrinkPage({ params, searchParams }: { params: 
     <>
       <p className="mb-2 text-sm">
         <Link href="/admin/drinks" className="font-semibold text-olive-deep">
-          Drinks menu
+          Menu &amp; merch
         </Link>
       </p>
-      <PageHeader title={id === "new" ? "Add a drink" : drink.name} />
+      <PageHeader title={id === "new" ? "Add an item" : drink.name} />
       <DrinkForm drink={drink} justSaved={saved === "1"} />
     </>
   );

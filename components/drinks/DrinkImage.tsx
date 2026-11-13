@@ -1,14 +1,15 @@
-import { drinkSvg } from "@/lib/brand/drink-art";
+import { menuArtSvg } from "@/lib/brand/menu-art";
 
 /**
- * Shows the drink's uploaded photograph when there is one, otherwise the
- * original Palm Bite illustration in the drink's accent colour.
+ * Shows the item's uploaded photograph when there is one, otherwise the
+ * original animated Palm Bite illustration for its art style and colour.
  */
 export function DrinkImage({
   name,
   imageUrl,
   accent,
   id,
+  art = "iced",
   className = "",
   priority = false,
 }: {
@@ -16,6 +17,7 @@ export function DrinkImage({
   imageUrl: string | null;
   accent: string;
   id: string;
+  art?: string | null;
   className?: string;
   priority?: boolean;
 }) {
@@ -36,7 +38,7 @@ export function DrinkImage({
       role="img"
       aria-label={name}
       className={`h-full w-full [&>svg]:h-full [&>svg]:w-full ${className}`}
-      dangerouslySetInnerHTML={{ __html: drinkSvg({ accent, idSuffix: id.replace(/-/g, "").slice(0, 10) }) }}
+      dangerouslySetInnerHTML={{ __html: menuArtSvg({ art, accent, idSuffix: id.replace(/-/g, "").slice(0, 10) }) }}
     />
   );
 }

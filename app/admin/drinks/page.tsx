@@ -6,8 +6,9 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { DrinkImage } from "@/components/drinks/DrinkImage";
 import type { Drink } from "@/lib/types";
+import { naira } from "@/lib/format";
 
-export const metadata: Metadata = { title: "Drinks menu" };
+export const metadata: Metadata = { title: "Menu & merch" };
 
 export default async function AdminDrinksPage() {
   const { supabase } = await requireRole(["admin"], "/admin/drinks");
@@ -18,11 +19,11 @@ export default async function AdminDrinksPage() {
   return (
     <>
       <PageHeader
-        title="Drinks menu"
-        description="Customers see active drinks. Only drinks marked reward eligible can be chosen as a free drink."
+        title="Menu & merch"
+        description="Everything on the menu and in the merch shop. Only drinks can be chosen as the free reward."
         actions={
           <ButtonLink href="/admin/drinks/new" variant="olive" icon="plus">
-            Add a drink
+            Add an item
           </ButtonLink>
         }
       />
@@ -40,11 +41,14 @@ export default async function AdminDrinksPage() {
               <li key={d.id}>
                 <Link href={`/admin/drinks/${d.id}`} className="flex gap-4 rounded-2xl border border-line p-3 transition-colors hover:border-olive">
                   <div className="h-24 w-20 shrink-0 overflow-hidden rounded-xl p-1" style={{ background: `${d.accent_color}2e` }}>
-                    <DrinkImage name={d.name} imageUrl={d.image_url} accent={d.accent_color} id={d.id} />
+                    <DrinkImage name={d.name} imageUrl={d.image_url} accent={d.accent_color} art={d.art} id={d.id} />
                   </div>
                   <div className="min-w-0">
                     <p className="font-semibold">{d.name}</p>
-                    <p className="text-sm text-muted">{d.category}</p>
+                    <p className="text-sm text-muted">
+                      {d.category}
+                      {d.price_naira !== null ? `, ${naira(d.price_naira)}` : ""}
+                    </p>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {d.is_active ? <Badge tone="sage">Active</Badge> : <Badge tone="muted">Hidden</Badge>}
                       {d.is_reward_eligible && <Badge tone="olive">Reward</Badge>}

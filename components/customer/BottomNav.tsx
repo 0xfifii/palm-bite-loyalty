@@ -6,7 +6,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 
 const items: { href: string; label: string; icon: IconName }[] = [
   { href: "/home", label: "Home", icon: "home" },
-  { href: "/drinks", label: "Drinks", icon: "cup" },
+  { href: "/menu", label: "Menu", icon: "cup" },
   { href: "/scan", label: "Scan", icon: "scan" },
   { href: "/rewards", label: "Rewards", icon: "gift" },
   { href: "/profile", label: "Profile", icon: "user" },

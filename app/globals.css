@@ -138,6 +138,26 @@ body {
   to { transform: scale(1.8); opacity: 0; }
 }
 
+/* Menu illustration motion (see lib/brand/menu-art.ts). */
+.pb-art * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes pb-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes pb-bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(4px) rotate(2deg); } }
+@keyframes pb-sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+@keyframes pb-steam { 0% { opacity: 0; transform: translateY(10px) scaleY(0.8); } 30% { opacity: 0.85; } 100% { opacity: 0; transform: translateY(-26px) scaleY(1.1); } }
+@keyframes pb-bubble { 0% { opacity: 0; transform: translateY(0); } 25% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(-70px); } }
+@keyframes pb-drip { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+@keyframes pb-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(45deg); } }
+.pb-art .pb-float { animation: pb-float 4.5s ease-in-out infinite; }
+.pb-art .pb-bob { animation: pb-bob 3.2s ease-in-out infinite; }
+.pb-art .pb-sway { animation: pb-sway 5s ease-in-out infinite; transform-origin: bottom center; }
+.pb-art .pb-steam { animation: pb-steam 2.8s ease-out infinite; }
+.pb-art .pb-bubble { animation: pb-bubble 3s ease-in infinite; }
+.pb-art .pb-drip { animation: pb-drip 2.6s ease-in-out infinite; }
+.pb-art .pb-twinkle { animation: pb-twinkle 2.4s ease-in-out infinite; }
+
 .animate-splash-in { animation: splash-in 700ms var(--ease-out-soft) both; }
 .animate-stamp-pop { animation: stamp-pop 520ms var(--ease-out-soft) both; }
 .animate-rise { animation: rise 520ms var(--ease-out-soft) both; }

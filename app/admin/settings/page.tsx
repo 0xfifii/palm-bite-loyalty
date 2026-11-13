@@ -5,7 +5,9 @@ import { PageHeader, Panel, Table, Td } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { SubmitButton } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { updateSettings } from "@/app/admin/actions";
+import { updateBusiness, updateSettings } from "@/app/admin/actions";
+import { Field, TextArea } from "@/components/ui/Field";
+import { loadBusiness } from "@/lib/loyalty/queries";
 import { StaffRequests } from "@/components/admin/StaffRequests";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -14,7 +16,8 @@ const COMMON_ZONES = ["Africa/Lagos", "Africa/Accra", "Africa/Nairobi", "Africa/
 
 export default async function SettingsPage() {
   const { supabase } = await requireRole(["admin"], "/admin/settings");
-  const [{ data: settings }, { data: team }] = await Promise.all([
+  const [business, { data: settings }, { data: team }] = await Promise.all([
+    loadBusiness(supabase),
     supabase.from("app_settings").select("business_timezone, qr_ttl_seconds, updated_at").single(),
     supabase.from("profiles").select("id, full_name, email, role, status").in("role", ["staff", "admin"]).order("role").order("full_name"),
   ]);
@@ -58,6 +61,32 @@ export default async function SettingsPage() {
             </div>
             <SubmitButton variant="olive" pendingLabel="Saving...">
               Save settings
+            </SubmitButton>
+          </ActionForm>
+        </Panel>
+
+        <Panel title="Ordering and contact">
+          <ActionForm action={updateBusiness} className="space-y-4">
+            <Field label="WhatsApp order link" name="order_link" type="url" required defaultValue={business.order_link} hint="Where Send order on WhatsApp goes." />
+            <Field
+              label="WhatsApp number (optional)"
+              name="whatsapp_number"
+              inputMode="tel"
+              placeholder="2348031234567"
+              defaultValue={business.whatsapp_number ?? ""}
+              hint="With country code, no +. When set, orders open WhatsApp with the message already typed in."
+            />
+            <Field label="Address" name="store_address" defaultValue={business.store_address} />
+            <TextArea
+              label="Payment instructions (optional)"
+              name="payment_note"
+              rows={3}
+              maxLength={500}
+              defaultValue={business.payment_note ?? ""}
+              hint="Shown after an order is placed. For example your bank name, account name and account number."
+            />
+            <SubmitButton variant="olive" pendingLabel="Saving...">
+              Save details
             </SubmitButton>
           </ActionForm>
         </Panel>

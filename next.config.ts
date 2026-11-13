@@ -41,6 +41,9 @@ const nextConfig: NextConfig = {
     // Drink photo uploads (4 MB cap, plus multipart overhead).
     serverActions: { bodySizeLimit: "4200kb" },
   },
+  async redirects() {
+    return [{ source: "/drinks", destination: "/menu", permanent: true }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

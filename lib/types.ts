@@ -64,6 +64,46 @@ export type Drink = {
   is_sample: boolean;
   customization: CustomizationGroup[];
   sort_order: number;
+  price_naira: number | null;
+  item_type: "drink" | "food" | "pick" | "merch";
+  art: string;
+};
+
+export type CommunityItem = {
+  id: string;
+  kind: "club" | "event";
+  title: string;
+  tagline: string;
+  description: string;
+  schedule: string;
+  location: string;
+  join_link: string | null;
+  starts_at: string | null;
+  icon: "fitness" | "book" | "spark";
+  is_active: boolean;
+  sort_order: number;
+};
+
+export type OrderLine = { id: string; name: string; qty: number; price: number; line_total: number };
+
+export type Order = {
+  id: string;
+  reference: string;
+  customer_id: string;
+  items: OrderLine[];
+  total_naira: number;
+  fulfilment: "pickup" | "dine_in" | "delivery";
+  note: string | null;
+  status: "new" | "confirmed" | "ready" | "completed" | "cancelled";
+  created_at: string;
+  updated_at: string;
+};
+
+export type BusinessSettings = {
+  order_link: string;
+  whatsapp_number: string | null;
+  store_address: string;
+  payment_note: string | null;
 };
 
 export type Redemption = {

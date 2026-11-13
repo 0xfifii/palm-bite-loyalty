@@ -81,6 +81,9 @@ export const drinkSchema = z.object({
   sort_order: z.coerce.number().int().min(0).max(10000),
   is_active: z.boolean(),
   is_reward_eligible: z.boolean(),
+  price_naira: z.coerce.number().int().min(0).max(10_000_000).nullable(),
+  item_type: z.enum(["drink", "food", "pick", "merch"]),
+  art: z.enum(["iced", "frappe", "juice", "hot", "plate", "salad", "waffle", "cake", "bread", "croissant", "pizza", "pie", "wrap", "sandwich", "combo", "tee", "tote", "cap"]),
   customization: z
     .array(
       z.object({

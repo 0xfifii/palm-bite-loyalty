@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Wordmark } from "@/components/brand/Logo";
 import { ButtonLink } from "@/components/ui/Button";
 import { DrinkImage } from "@/components/drinks/DrinkImage";
@@ -15,7 +16,7 @@ export function Welcome() {
             <Wordmark height={30} />
           </div>
 
-          <span className="mt-6 rounded-full bg-peach px-3 py-1.5 text-xs font-semibold text-olive-night">Loyalty club</span>
+          <span className="mt-6 rounded-full bg-peach px-3 py-1.5 text-xs font-semibold text-olive-night">pour. sip. stay a while.</span>
 
           <h2
             aria-hidden="true"
@@ -28,10 +29,10 @@ export function Welcome() {
 
           <div className="relative -mt-14 flex h-[19rem] w-full max-w-[22rem] items-end justify-center" aria-hidden="true">
             <div className="absolute bottom-0 left-[6%] h-[17rem] w-[12rem] -rotate-[11deg] drop-shadow-[0_24px_30px_rgba(20,28,14,0.35)]">
-              <DrinkImage name="" imageUrl={null} accent="#9DB27C" id="hero-left" />
+              <DrinkImage name="" imageUrl={null} accent="#9DB27C" art="iced" id="hero-left" />
             </div>
             <div className="absolute right-[6%] bottom-2 h-[17rem] w-[12rem] rotate-[10deg] drop-shadow-[0_24px_30px_rgba(20,28,14,0.35)]">
-              <DrinkImage name="" imageUrl={null} accent="#E9B08F" id="hero-right" />
+              <DrinkImage name="" imageUrl={null} accent="#8B6A4F" art="frappe" id="hero-right" />
             </div>
           </div>
         </section>
@@ -52,6 +53,10 @@ export function Welcome() {
             <InstallButton variant="light" className="w-full" />
           </div>
           <p className="mt-5 text-sm text-muted">One visit a day earns one point. Fifteen points earns a free drink.</p>
+          <div className="mt-4 flex justify-center gap-5 text-sm font-semibold text-olive-deep">
+            <Link href="/menu" className="underline underline-offset-4">See the menu</Link>
+            <Link href="/community" className="underline underline-offset-4">Community</Link>
+          </div>
         </section>
       </div>
     </main>

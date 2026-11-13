@@ -137,6 +137,9 @@ export async function saveDrink(_prev: ActionState, formData: FormData): Promise
     sort_order: formData.get("sort_order") ?? 100,
     is_active: formData.get("is_active") === "on",
     is_reward_eligible: formData.get("is_reward_eligible") === "on",
+    price_naira: String(formData.get("price_naira") ?? "").trim() === "" ? null : String(formData.get("price_naira")).replace(/[^0-9]/g, ""),
+    item_type: formData.get("item_type"),
+    art: formData.get("art"),
     customization: parseCustomizationText(String(formData.get("customization") ?? "")),
   });
   if (!parsed.success) {
@@ -165,7 +168,7 @@ export async function saveDrink(_prev: ActionState, formData: FormData): Promise
   if (error || !data) return { error: "The drink could not be saved." };
 
   revalidatePath("/admin/drinks");
-  revalidatePath("/drinks");
+  revalidatePath("/menu");
   revalidatePath("/home");
   if (isNew) redirect(`/admin/drinks/${data.id}?saved=1`);
   return { ok: true, message: "Drink saved." };
@@ -186,4 +189,80 @@ export async function decideStaffRequest(_prev: ActionState, formData: FormData)
     "/admin/settings",
     "/admin",
   ]);
+}
+
+export async function updateBusiness(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase } = await admin();
+  const { data, error } = await supabase.rpc("admin_update_business", {
+    p_order_link: String(formData.get("order_link") ?? "").trim(),
+    p_whatsapp_number: String(formData.get("whatsapp_number") ?? "").trim(),
+    p_store_address: String(formData.get("store_address") ?? "").trim(),
+    p_payment_note: String(formData.get("payment_note") ?? "").trim(),
+  });
+  if (error) return { error: actionMessage("TEMPORARY_ERROR") };
+  const r = data as RpcResult;
+  if (r.code === "INVALID_LINK") return { error: "The order link must start with https://" };
+  if (r.code === "INVALID_PHONE") return { error: "Enter the WhatsApp number with country code, for example 2348031234567." };
+  return done(r, "Business details saved.", ["/admin/settings", "/home", "/menu", "/community"]);
+}
+
+const communitySchema = z.object({
+  kind: z.enum(["club", "event"]),
+  title: z.string().trim().min(2, "Add a title.").max(80),
+  tagline: z.string().trim().max(120),
+  description: z.string().trim().max(1000),
+  schedule: z.string().trim().max(160),
+  location: z.string().trim().max(160),
+  join_link: z.union([z.literal(""), z.url().refine((u) => u.startsWith("https://"), "Links must start with https://")]),
+  starts_at: z.string().trim().max(40),
+  icon: z.enum(["fitness", "book", "spark"]),
+  sort_order: z.coerce.number().int().min(0).max(10000),
+  is_active: z.boolean(),
+});
+
+export async function saveCommunity(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase } = await admin();
+  const id = String(formData.get("id") ?? "");
+  const isNew = id === "new";
+  if (!isNew && !z.uuid().safeParse(id).success) return { error: "Item not found." };
+  const parsed = communitySchema.safeParse({
+    kind: formData.get("kind"),
+    title: formData.get("title"),
+    tagline: formData.get("tagline") ?? "",
+    description: formData.get("description") ?? "",
+    schedule: formData.get("schedule") ?? "",
+    location: formData.get("location") ?? "",
+    join_link: formData.get("join_link") ?? "",
+    starts_at: formData.get("starts_at") ?? "",
+    icon: formData.get("icon"),
+    sort_order: formData.get("sort_order") ?? 100,
+    is_active: formData.get("is_active") === "on",
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const v = parsed.data;
+  // datetime-local input is Lagos time.
+  const startsAt = v.starts_at ? new Date(`${v.starts_at}:00+01:00`) : null;
+  if (startsAt && Number.isNaN(startsAt.getTime())) return { error: "Check the event date and time." };
+  const values = { ...v, join_link: v.join_link || null, starts_at: startsAt ? startsAt.toISOString() : null };
+  const query = isNew
+    ? supabase.from("community_items").insert(values).select("id").single()
+    : supabase.from("community_items").update(values).eq("id", id).select("id").single();
+  const { data, error } = await query;
+  if (error || !data) return { error: "Could not save. Please try again." };
+  revalidatePath("/admin/community");
+  revalidatePath("/community");
+  revalidatePath("/home");
+  if (isNew) redirect(`/admin/community/${data.id}?saved=1`);
+  return { ok: true, message: "Saved." };
+}
+
+export async function deleteCommunity(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase } = await admin();
+  const id = z.uuid().safeParse(formData.get("id"));
+  if (!id.success) return { error: "Item not found." };
+  const { error } = await supabase.from("community_items").delete().eq("id", id.data);
+  if (error) return { error: "Could not delete." };
+  revalidatePath("/community");
+  revalidatePath("/home");
+  redirect("/admin/community");
 }

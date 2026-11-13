@@ -147,3 +147,16 @@ export async function decideVisit(requestId: string, approve: boolean): Promise<
   };
   return { ok: false, error: messages[r.code] ?? actionMessage(r.code), code: r.code };
 }
+
+export async function updateOrderStatus(orderId: string, status: string): Promise<Result> {
+  const { supabase } = await staff();
+  const id = z.uuid().safeParse(orderId);
+  const st = z.enum(["new", "confirmed", "ready", "completed", "cancelled"]).safeParse(status);
+  if (!id.success || !st.success) return { ok: false, error: "Invalid request." };
+  const { data, error } = await supabase.rpc("set_order_status", { p_order: id.data, p_status: st.data });
+  if (error) return { ok: false, error: actionMessage("TEMPORARY_ERROR") };
+  if ((data as RpcResult).code !== "OK") return { ok: false, error: actionMessage((data as RpcResult).code) };
+  revalidatePath("/staff/orders");
+  revalidatePath("/admin/orders");
+  return { ok: true };
+}

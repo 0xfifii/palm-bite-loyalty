@@ -49,3 +49,11 @@ export function describeCustomizations(c: Record<string, string | string[]> | nu
 export function currentTimeMs(): number {
   return Date.now();
 }
+
+const NAIRA = new Intl.NumberFormat("en-NG", { maximumFractionDigits: 0 });
+
+/** 17000 becomes "N17,000" with the naira sign. */
+export function naira(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined) return "";
+  return `\u20A6${NAIRA.format(amount)}`;
+}

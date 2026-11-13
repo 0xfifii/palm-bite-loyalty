@@ -42,7 +42,7 @@ const ACTION_LABELS: Record<string, string> = {
 
 export default async function AdminOverview() {
   const { supabase } = await requireRole(["admin"], "/admin");
-  const [{ data: overview }, { data: activity }, { count: staffRequests }] = await Promise.all([
+  const [{ data: overview }, { data: activity }, { count: staffRequests }, { count: newOrders }] = await Promise.all([
     supabase.rpc("admin_overview"),
     supabase
       .from("audit_logs")
@@ -51,6 +51,7 @@ export default async function AdminOverview() {
       .order("created_at", { ascending: false })
       .limit(12),
     supabase.from("profiles").select("id", { count: "exact", head: true }).eq("staff_request", "pending"),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "new"),
   ]);
   const o = overview as Overview | null;
   const tz = o?.business_timezone ?? "Africa/Lagos";
@@ -72,6 +73,12 @@ export default async function AdminOverview() {
           </>
         }
       />
+
+      {(newOrders ?? 0) > 0 && (
+        <a href="/admin/orders" className="mb-3 block rounded-[var(--radius-card)] bg-olive-deep p-4 font-semibold text-cream">
+          {newOrders} new {newOrders === 1 ? "order" : "orders"} waiting. Open Orders.
+        </a>
+      )}
 
       {(staffRequests ?? 0) > 0 && (
         <a href="/admin/settings" className="mb-6 block rounded-[var(--radius-card)] bg-peach p-4 font-semibold text-olive-night">

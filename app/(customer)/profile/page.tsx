@@ -4,6 +4,8 @@ import { requireUser, homeFor } from "@/lib/auth";
 import { loadCustomer } from "@/lib/loyalty/queries";
 import { ProfileForm } from "./ProfileForm";
 import { InstallButton } from "@/components/pwa/InstallButton";
+import { MyOrders } from "@/components/orders/MyOrders";
+import type { Order } from "@/lib/types";
 import { Icon } from "@/components/ui/Icon";
 import { formatDate, initials } from "@/lib/format";
 import { signOutAction } from "@/app/(auth)/actions";
@@ -12,7 +14,12 @@ export const metadata: Metadata = { title: "Profile" };
 
 export default async function ProfilePage() {
   const { supabase, user, profile } = await requireUser("/profile");
-  const data = await loadCustomer(supabase, user.id, { visits: 1, rewards: 100 });
+  const [data, { data: orderRows }] = await Promise.all([
+    loadCustomer(supabase, user.id, { visits: 1, rewards: 100 }),
+    supabase.from("orders").select("*").eq("customer_id", user.id).order("created_at", { ascending: false }).limit(10),
+  ]);
+  const orders = (orderRows ?? []) as Order[];
+  const orderDates = Object.fromEntries(orders.map((o) => [o.id, formatDate(o.created_at, data.timezone)]));
   const a = data.account;
 
   return (
@@ -53,6 +60,13 @@ export default async function ProfilePage() {
           Your details
         </h2>
         <ProfileForm fullName={profile.full_name} phone={profile.phone} email={profile.email} />
+      </section>
+
+      <section className="mt-4 rounded-[var(--radius-card)] bg-surface p-5" aria-labelledby="orders-heading">
+        <h2 id="orders-heading" className="type-heading mb-2 text-lg">
+          Your orders
+        </h2>
+        <MyOrders orders={orders} dates={orderDates} />
       </section>
 
       <nav className="mt-4 divide-y divide-line rounded-[var(--radius-card)] bg-surface px-5" aria-label="Your history">

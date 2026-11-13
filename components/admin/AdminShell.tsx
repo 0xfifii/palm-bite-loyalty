@@ -8,11 +8,13 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 
 const nav: { href: string; label: string; icon: IconName }[] = [
   { href: "/admin", label: "Overview", icon: "chart" },
+  { href: "/admin/orders", label: "Orders", icon: "bag" },
   { href: "/admin/customers", label: "Customers", icon: "users" },
   { href: "/admin/visits", label: "Visits", icon: "list" },
   { href: "/admin/qr", label: "QR display", icon: "qr" },
   { href: "/admin/rewards", label: "Rewards", icon: "gift" },
-  { href: "/admin/drinks", label: "Drinks menu", icon: "cup" },
+  { href: "/admin/drinks", label: "Menu & merch", icon: "cup" },
+  { href: "/admin/community", label: "Community", icon: "spark" },
   { href: "/admin/reports", label: "Reports", icon: "download" },
   { href: "/admin/settings", label: "Settings", icon: "settings" },
 ];

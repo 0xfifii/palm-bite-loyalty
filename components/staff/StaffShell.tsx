@@ -7,6 +7,7 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 
 const tabs: { href: string; label: string; icon: IconName }[] = [
   { href: "/staff", label: "Approvals", icon: "check" },
+  { href: "/staff/orders", label: "Orders", icon: "bag" },
   { href: "/staff/redeem", label: "Redeem", icon: "gift" },
   { href: "/staff/check-in", label: "Check in", icon: "users" },
   { href: "/staff/qr", label: "Visit QR", icon: "qr" },

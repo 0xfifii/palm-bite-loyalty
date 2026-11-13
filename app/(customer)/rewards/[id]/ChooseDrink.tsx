@@ -107,7 +107,7 @@ export function ChooseDrink({ rewardId, drinks }: { rewardId: string; drinks: Dr
               {drink.name.replace(/^Sample\s+/i, "")}
             </p>
             <div key={drink.id} className="animate-rise absolute inset-x-0 top-12 mx-auto h-60 w-44">
-              <DrinkImage name={drink.name} imageUrl={drink.image_url} accent={drink.accent_color} id={drink.id} priority />
+              <DrinkImage name={drink.name} imageUrl={drink.image_url} accent={drink.accent_color} art={drink.art} id={drink.id} priority />
             </div>
           </>
         )}
@@ -138,7 +138,7 @@ export function ChooseDrink({ rewardId, drinks }: { rewardId: string; drinks: Dr
                     }`}
                   >
                     <span className="h-20 w-14">
-                      <DrinkImage name="" imageUrl={d.image_url} accent={d.accent_color} id={`${d.id}-t`} />
+                      <DrinkImage name="" imageUrl={d.image_url} accent={d.accent_color} art={d.art} id={`${d.id}-t`} />
                     </span>
                     <span className="mt-1.5 line-clamp-2 text-xs leading-tight font-medium">{d.name}</span>
                   </button>

@@ -6,11 +6,14 @@ import { Field, Notice, TextArea } from "@/components/ui/Field";
 import { SubmitButton } from "@/components/ui/Button";
 import { DrinkImage } from "@/components/drinks/DrinkImage";
 import { customizationToText } from "@/lib/validation";
+import { ART_LABELS, ART_STYLES } from "@/lib/brand/menu-art";
 import type { Drink } from "@/lib/types";
 
 export function DrinkForm({ drink, justSaved }: { drink: Drink; justSaved?: boolean }) {
   const [state, action] = useActionState<ActionState, FormData>(saveDrink, justSaved ? { ok: true, message: "Drink added." } : {});
   const [accent, setAccent] = useState(drink.accent_color);
+  const [art, setArt] = useState(drink.art);
+  const [type, setType] = useState(drink.item_type);
   const [preview, setPreview] = useState<string | null>(null);
 
   return (
@@ -22,7 +25,33 @@ export function DrinkForm({ drink, justSaved }: { drink: Drink; justSaved?: bool
         <Field label="Name" name="name" required maxLength={80} defaultValue={drink.name} />
         <TextArea label="Description" name="description" rows={3} maxLength={400} defaultValue={drink.description} />
         <div className="grid gap-5 sm:grid-cols-3">
-          <Field label="Category" name="category" required maxLength={40} defaultValue={drink.category} />
+          <Field label="Price (naira)" name="price_naira" inputMode="numeric" placeholder="7000" defaultValue={drink.price_naira ?? ""} hint="Leave empty to show without a price." />
+          <div>
+            <label htmlFor="item_type" className="mb-1.5 block text-sm font-medium">
+              Type
+            </label>
+            <select id="item_type" name="item_type" value={type} onChange={(e) => setType(e.target.value as typeof type)} className="h-13 w-full rounded-2xl border border-line bg-surface px-3">
+              <option value="drink">Drink</option>
+              <option value="food">Food</option>
+              <option value="pick">Our Picks combo</option>
+              <option value="merch">Merch</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="art" className="mb-1.5 block text-sm font-medium">
+              Illustration
+            </label>
+            <select id="art" name="art" value={art} onChange={(e) => setArt(e.target.value)} className="h-13 w-full rounded-2xl border border-line bg-surface px-3">
+              {ART_STYLES.map((a) => (
+                <option key={a} value={a}>
+                  {ART_LABELS[a]}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-3">
+          <Field label="Section" name="category" required maxLength={40} defaultValue={drink.category} hint="Our Picks, Gems, Slab, Pastries, Fresh, Palms Coffee or Merch" />
           <Field label="Menu order" name="sort_order" type="number" min={0} max={10000} defaultValue={drink.sort_order} hint="Lower numbers show first." />
           <div>
             <label htmlFor="accent" className="mb-1.5 block text-sm font-medium">
@@ -52,8 +81,8 @@ export function DrinkForm({ drink, justSaved }: { drink: Drink; justSaved?: bool
             Show on the menu
           </label>
           <label className="flex items-center gap-3">
-            <input type="checkbox" name="is_reward_eligible" defaultChecked={drink.is_reward_eligible} className="size-5 accent-olive" />
-            Can be chosen as a free reward drink
+            <input type="checkbox" name="is_reward_eligible" defaultChecked={drink.is_reward_eligible} disabled={type !== "drink"} className="size-5 accent-olive" />
+            Can be chosen as a free reward drink {type !== "drink" && <span className="text-sm text-muted">(drinks only)</span>}
           </label>
           {drink.is_sample && (
             <label className="flex items-center gap-3">
@@ -63,7 +92,7 @@ export function DrinkForm({ drink, justSaved }: { drink: Drink; justSaved?: bool
           )}
         </fieldset>
         <SubmitButton variant="olive" pendingLabel="Saving...">
-          {drink.id === "new" ? "Add drink" : "Save drink"}
+          {drink.id === "new" ? "Add item" : "Save item"}
         </SubmitButton>
       </div>
 
@@ -74,7 +103,7 @@ export function DrinkForm({ drink, justSaved }: { drink: Drink; justSaved?: bool
             // eslint-disable-next-line @next/next/no-img-element
             <img src={preview} alt="New photo preview" className="h-full w-full rounded-xl object-cover" />
           ) : (
-            <DrinkImage name={drink.name || "Drink"} imageUrl={drink.image_url} accent={accent} id={`edit-${drink.id}`} />
+            <DrinkImage name={drink.name || "Item"} imageUrl={drink.image_url} accent={accent} art={art} id={`edit-${drink.id}`} />
           )}
         </div>
         <input
