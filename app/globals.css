@@ -139,11 +139,13 @@ body {
 }
 
 /* Menu illustration motion (see lib/brand/menu-art.ts). */
-.pb-art * {
+.pb-art :is(.pb-float, .pb-bob, .pb-sway, .pb-steam, .pb-bubble, .pb-drip, .pb-twinkle, .pb-shadow, .pb-flake) {
   transform-box: fill-box;
   transform-origin: center;
 }
-@keyframes pb-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes pb-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-7px) rotate(-1deg); } 50% { transform: translateY(-14px) rotate(0deg); } 75% { transform: translateY(-7px) rotate(1deg); } }
+@keyframes pb-shadow { 0%, 100% { transform: scaleX(1); opacity: 0.14; } 50% { transform: scaleX(0.78); opacity: 0.07; } }
+@keyframes pb-flake { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(-40px) rotate(160deg); } }
 @keyframes pb-bob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(4px) rotate(2deg); } }
 @keyframes pb-sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
 @keyframes pb-steam { 0% { opacity: 0; transform: translateY(10px) scaleY(0.8); } 30% { opacity: 0.85; } 100% { opacity: 0; transform: translateY(-26px) scaleY(1.1); } }
@@ -151,6 +153,8 @@ body {
 @keyframes pb-drip { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 @keyframes pb-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(45deg); } }
 .pb-art .pb-float { animation: pb-float 4.5s ease-in-out infinite; }
+.pb-art .pb-shadow { animation: pb-shadow 4.5s ease-in-out infinite; }
+.pb-art .pb-flake { animation: pb-flake 3.6s ease-out infinite; }
 .pb-art .pb-bob { animation: pb-bob 3.2s ease-in-out infinite; }
 .pb-art .pb-sway { animation: pb-sway 5s ease-in-out infinite; transform-origin: bottom center; }
 .pb-art .pb-steam { animation: pb-steam 2.8s ease-out infinite; }
