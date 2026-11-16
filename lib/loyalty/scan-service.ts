@@ -64,7 +64,7 @@ export async function processScan(
 
   const [userOk, ipOk] = await Promise.all([
     deps.rateLimit(`scan:user:${userId}`, 12, 60),
-    deps.rateLimit(`scan:ip:${input.ipHash}`, 60, 60),
+    deps.rateLimit(`scan:ip:${input.ipHash}`, 600, 60),
   ]);
   if (!userOk || !ipOk) return respond("RATE_LIMITED");
 

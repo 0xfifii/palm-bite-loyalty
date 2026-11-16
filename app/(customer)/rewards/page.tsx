@@ -7,6 +7,7 @@ import { RewardStatusBadge, Badge } from "@/components/ui/Badge";
 import { describeCustomizations, formatDate, formatDateTime, formatTime, formatVisitDate } from "@/lib/format";
 import { pad2 } from "@/lib/loyalty/progress";
 import { ChangeDrinkButton } from "./ChangeDrinkButton";
+import { LoyaltyCard } from "@/components/customer/LoyaltyCard";
 
 export const metadata: Metadata = { title: "Rewards" };
 
@@ -25,6 +26,23 @@ export default async function RewardsPage() {
   return (
     <main className="px-5 pt-[calc(var(--safe-top)+1.5rem)]">
       <h1 className="type-display text-[3rem] text-olive-deep uppercase">Rewards</h1>
+      <p className="mt-1 text-muted">One visit a day earns a point. Fifteen points earns a free drink.</p>
+
+      <div className="mt-6">
+        <LoyaltyCard
+          points={account?.current_points ?? 0}
+          cycle={account?.cycle_number ?? 1}
+          openReward={data.openReward}
+          pendingRedemption={data.pendingRedemption}
+        />
+      </div>
+      {!data.openReward && (
+        <div className="mt-4">
+          <ButtonLink href="/scan" variant="dark" size="lg" icon="scan" trailingArrow full>
+            Scan &amp; Earn
+          </ButtonLink>
+        </div>
+      )}
 
       <dl className="mt-6 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-[var(--radius-card)] bg-olive-deep px-2 py-4 text-cream">

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ code: "UNAUTHENTICATED" }, { status: 401, headers: noStore });
 
-    if (!(await rateLimit(`qr:mint:${user.id}`, 20, 60))) {
+    if (!(await rateLimit(`qr:mint:${user.id}`, 120, 60))) {
       return NextResponse.json({ code: "RATE_LIMITED" }, { status: 429, headers: noStore });
     }
 

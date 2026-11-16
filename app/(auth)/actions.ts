@@ -17,9 +17,17 @@ export type FormState = {
 
 const DEFAULT_CC = process.env.NEXT_PUBLIC_DEFAULT_COUNTRY_CODE || "234";
 
-async function limited(action: string, limit: number, windowSeconds: number): Promise<boolean> {
+/**
+ * Two limits per action: a generous one per network (a busy shop shares one
+ * Wi-Fi address) and a tight one per email address (stops guessing).
+ */
+async function limited(action: string, perNetwork: number, perEmail: number, windowSeconds: number, email?: string): Promise<boolean> {
   const ip = hashIp(await clientIp());
-  return !(await rateLimit(`${action}:${ip}`, limit, windowSeconds));
+  const checks = [rateLimit(`${action}:ip:${ip}`, perNetwork, windowSeconds)];
+  const e = (email ?? "").trim().toLowerCase();
+  if (e) checks.push(rateLimit(`${action}:email:${hashIp(e)}`, perEmail, windowSeconds));
+  const results = await Promise.all(checks);
+  return results.some((ok) => !ok);
 }
 
 export async function registerAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -28,7 +36,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     phone: String(formData.get("phone") ?? ""),
     email: String(formData.get("email") ?? ""),
   };
-  if (await limited("register", 5, 600)) {
+  if (await limited("register", 200, 5, 600, values.email)) {
     return { error: "Too many sign-up attempts. Please wait a few minutes.", values };
   }
 
@@ -82,7 +90,7 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
   const values = { email: String(formData.get("email") ?? "") };
   const next = safeNext(formData.get("next"), "");
 
-  if (await limited("signin", 10, 300)) {
+  if (await limited("signin", 400, 10, 300, values.email)) {
     return { error: "Too many sign-in attempts. Please wait a few minutes.", values };
   }
 
@@ -111,7 +119,7 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
 }
 
 export async function forgotPasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
-  if (await limited("recover", 5, 600)) {
+  if (await limited("recover", 100, 3, 600, String(formData.get("email") ?? ""))) {
     return { error: "Too many requests. Please wait a few minutes." };
   }
   const parsed = emailSchema.safeParse(String(formData.get("email") ?? ""));

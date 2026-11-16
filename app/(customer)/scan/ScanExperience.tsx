@@ -340,8 +340,8 @@ function ResultView({ result, onScanAgain, onRetry }: { result: ScanResponse; on
               </ButtonLink>
             </>
           ) : (
-            <ButtonLink href="/home" variant="dark" size="lg" full>
-              Back to my card
+            <ButtonLink href="/rewards" variant="dark" size="lg" full>
+              See my card
             </ButtonLink>
           )}
         </div>
@@ -356,7 +356,7 @@ function ResultView({ result, onScanAgain, onRetry }: { result: ScanResponse; on
   }
 
   if (code === "ALREADY_COLLECTED_TODAY") {
-    return <ResultPanel tone="info" title={result.title} message={result.message} link={{ label: "Back to my card", href: "/home" }} />;
+    return <ResultPanel tone="info" title={result.title} message={result.message} link={{ label: "See my card", href: "/rewards" }} />;
   }
 
   if (code === "UNAUTHENTICATED") {
@@ -406,8 +406,8 @@ function ResultPanel({
           </ButtonLink>
         )}
         {!link && (
-          <ButtonLink href="/home" variant="outline" size="lg" full>
-            Back to my card
+          <ButtonLink href="/rewards" variant="outline" size="lg" full>
+            See my card
           </ButtonLink>
         )}
       </div>

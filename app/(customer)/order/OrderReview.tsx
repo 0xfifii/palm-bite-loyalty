@@ -104,8 +104,8 @@ export function OrderReview({ menu, address }: { menu: MenuItem[]; address: stri
           <Button variant="ghost" size="md" onClick={() => void copyMessage(placed.message)}>
             {copied ? "Copied" : "Copy order again"}
           </Button>
-          <ButtonLink href="/home" variant="outline" size="lg" full>
-            Back to home
+          <ButtonLink href="/orders" variant="outline" size="lg" full>
+            Track my orders
           </ButtonLink>
         </div>
       </main>

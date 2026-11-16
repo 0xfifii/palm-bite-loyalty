@@ -9,6 +9,7 @@ const items: { href: string; label: string; icon: IconName }[] = [
   { href: "/menu", label: "Menu", icon: "cup" },
   { href: "/scan", label: "Scan", icon: "scan" },
   { href: "/rewards", label: "Rewards", icon: "gift" },
+  { href: "/orders", label: "Orders", icon: "bag" },
   { href: "/profile", label: "Profile", icon: "user" },
 ];
 
@@ -19,7 +20,7 @@ export function BottomNav() {
       aria-label="Main"
       className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md px-4 pb-[calc(var(--safe-bottom)+0.75rem)]"
     >
-      <ul className="flex items-center justify-between rounded-full bg-ink px-2 py-2 text-cream shadow-lift">
+      <ul className="flex items-center justify-between rounded-full bg-ink px-1.5 py-2 text-cream shadow-lift">
         {items.map((item) => {
           const active = path === item.href || path.startsWith(`${item.href}/`);
           if (item.href === "/scan") {
@@ -28,7 +29,7 @@ export function BottomNav() {
                 <Link
                   href="/scan"
                   aria-current={active ? "page" : undefined}
-                  className="-my-5 flex size-16 flex-col items-center justify-center rounded-full border-4 border-cream bg-peach text-olive-night shadow-soft transition-transform active:scale-95"
+                  className="-my-5 flex size-15 flex-col items-center justify-center rounded-full border-4 border-cream bg-peach text-olive-night shadow-soft transition-transform active:scale-95"
                 >
                   <Icon name="scan" className="size-6" />
                   <span className="sr-only">Scan and earn</span>
@@ -41,7 +42,7 @@ export function BottomNav() {
               <Link
                 href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-12 w-14 flex-col items-center justify-center gap-0.5 rounded-full text-[0.68rem] font-medium transition-colors ${
+                className={`flex h-12 w-[3.25rem] flex-col items-center justify-center gap-0.5 rounded-full text-[0.64rem] font-medium transition-colors ${
                   active ? "text-peach" : "text-cream/65 hover:text-cream"
                 }`}
               >
