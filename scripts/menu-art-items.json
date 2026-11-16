@@ -1,10 +1,5 @@
 [
   {
-    "name": "Shawarma",
-    "art": "wrap",
-    "accent": "#D9A45B"
-  },
-  {
     "name": "Matcha",
     "art": "iced",
     "accent": "#9DB27C"
