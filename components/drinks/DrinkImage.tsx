@@ -10,6 +10,7 @@ export function DrinkImage({
   accent,
   id,
   art = "iced",
+  fit = "cover",
   className = "",
   priority = false,
 }: {
@@ -18,10 +19,11 @@ export function DrinkImage({
   accent: string;
   id: string;
   art?: string | null;
+  fit?: "cover" | "contain";
   className?: string;
   priority?: boolean;
 }) {
-  if (imageUrl && imageUrl.startsWith("https://")) {
+  if (imageUrl && (imageUrl.startsWith("https://") || imageUrl.startsWith("/photos/"))) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
@@ -29,7 +31,7 @@ export function DrinkImage({
         alt={name}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
-        className={`h-full w-full object-cover ${className}`}
+        className={`h-full w-full ${fit === "contain" ? "object-contain" : "object-cover"} ${className}`}
       />
     );
   }

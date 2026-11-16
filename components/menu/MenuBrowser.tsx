@@ -109,8 +109,11 @@ function ItemCard({ d, qty, wide = false }: { d: Drink; qty: number; wide?: bool
   const orderable = d.price_naira !== null;
   return (
     <article className={`flex h-full overflow-hidden rounded-[var(--radius-card)] bg-surface ${wide ? "flex-row" : "flex-col"}`}>
-      <div className={`relative shrink-0 p-2 ${wide ? "h-40 w-36" : "h-44"}`} style={{ background: `${d.accent_color === "#1D2119" ? "#A9B89A" : d.accent_color}2e` }}>
-        <DrinkImage name={d.name} imageUrl={d.image_url} accent={d.accent_color} art={d.art} id={d.id} />
+      <div
+        className={`relative shrink-0 overflow-hidden ${d.image_url ? "" : "p-2"} ${wide ? "h-40 w-36" : d.item_type === "merch" ? "h-52" : "h-48"}`}
+        style={{ background: d.item_type === "merch" && d.image_url ? "#ffffff" : `${d.accent_color === "#1D2119" ? "#A9B89A" : d.accent_color}2e` }}
+      >
+        <DrinkImage name={d.name} imageUrl={d.image_url} accent={d.accent_color} art={d.art} id={d.id} fit={d.item_type === "merch" ? "contain" : "cover"} />
         {d.is_reward_eligible && (
           <span className="absolute top-2 left-2">
             <Badge tone="olive">Reward</Badge>

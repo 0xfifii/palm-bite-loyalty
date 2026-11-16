@@ -7,13 +7,14 @@ import { Badge } from "@/components/ui/Badge";
 import { DrinkImage } from "@/components/drinks/DrinkImage";
 import type { Drink } from "@/lib/types";
 import { naira } from "@/lib/format";
+import { withPhoto } from "@/lib/brand/photos";
 
 export const metadata: Metadata = { title: "Menu & merch" };
 
 export default async function AdminDrinksPage() {
   const { supabase } = await requireRole(["admin"], "/admin/drinks");
   const { data } = await supabase.from("drinks").select("*").order("sort_order").order("name");
-  const drinks = (data ?? []) as Drink[];
+  const drinks = ((data ?? []) as Drink[]).map(withPhoto);
   const samples = drinks.filter((d) => d.is_sample).length;
 
   return (

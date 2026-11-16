@@ -42,7 +42,7 @@ def register(page, name, phone, email):
     page.get_by_label("Full name").fill(name)
     page.get_by_label("Phone number").fill(phone)
     page.get_by_label("Email").fill(email)
-    page.get_by_label("Password").fill(PASSWORD)
+    page.get_by_label("Password", exact=True).fill(PASSWORD)
     page.get_by_role("button", name="Create my card").click()
     page.wait_for_url(re.compile(r"/(check-email|home)"))
 
@@ -52,7 +52,7 @@ def login(page, email, expect_path):
     page.context.clear_cookies()
     page.goto(f"{BASE}/login")
     page.get_by_label("Email").fill(email)
-    page.get_by_label("Password").fill(PASSWORD)
+    page.get_by_label("Password", exact=True).fill(PASSWORD)
     page.get_by_role("button", name="Sign in").click()
     page.wait_for_url(re.compile(expect_path))
 

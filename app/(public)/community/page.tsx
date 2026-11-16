@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { loadBusiness, loadCommunity } from "@/lib/loyalty/queries";
 import { CommunityCard } from "@/components/community/CommunityCard";
 import { Icon } from "@/components/ui/Icon";
+import { SocialLinks } from "@/components/community/SocialLinks";
 
 export const metadata: Metadata = { title: "Community" };
 
@@ -16,6 +17,10 @@ export default async function CommunityPage() {
       <p className="text-sm font-semibold text-olive">palm way, our way</p>
       <h1 className="type-display mt-1 text-[2.6rem] text-olive-deep uppercase">Community</h1>
       <p className="mt-2 text-muted">More than coffee. Move, read and hang out with the Palm Bite family.</p>
+
+      <section className="mt-6" aria-label="Follow Palm Bite">
+        <SocialLinks whatsappChat={business.order_link} />
+      </section>
 
       {events.length > 0 && (
         <section className="mt-6 space-y-3" aria-label="Events">

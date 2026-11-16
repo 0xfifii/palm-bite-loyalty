@@ -1,4 +1,5 @@
 import "server-only";
+import { withPhoto } from "@/lib/brand/photos";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BusinessSettings, CommunityItem, Drink, LoyaltyAccount, Redemption, Reward, Visit } from "@/lib/types";
 
@@ -49,7 +50,7 @@ export async function loadDrinks(supabase: SupabaseClient, opts: { eligibleOnly?
   let q = supabase.from("drinks").select("*").eq("is_active", true).order("sort_order").order("name");
   if (opts.eligibleOnly) q = q.eq("is_reward_eligible", true).eq("item_type", "drink");
   const { data } = await q;
-  return (data ?? []) as Drink[];
+  return ((data ?? []) as Drink[]).map(withPhoto);
 }
 
 /** Menu sections in the order Palm Bite presents them. */

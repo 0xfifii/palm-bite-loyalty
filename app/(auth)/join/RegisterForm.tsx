@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { registerAction, type FormState } from "../actions";
 import { Field, Notice } from "@/components/ui/Field";
+import { PasswordField } from "@/components/ui/PasswordField";
 import { SubmitButton } from "@/components/ui/Button";
 
 export function RegisterForm() {
@@ -61,10 +62,9 @@ export function RegisterForm() {
         hint="Staff use this to find your card if you can't scan."
       />
       <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={v.email} error={f.email} />
-      <Field
+      <PasswordField
         label="Password"
         name="password"
-        type="password"
         autoComplete="new-password"
         required
         minLength={8}

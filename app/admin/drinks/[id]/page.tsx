@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth";
 import { PageHeader } from "@/components/admin/ui";
 import { DrinkForm } from "@/components/admin/DrinkForm";
 import type { Drink } from "@/lib/types";
+import { withPhoto } from "@/lib/brand/photos";
 
 export const metadata: Metadata = { title: "Edit drink" };
 
@@ -34,7 +35,7 @@ export default async function EditDrinkPage({ params, searchParams }: { params: 
     if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
     const { data } = await supabase.from("drinks").select("*").eq("id", id).maybeSingle<Drink>();
     if (!data) notFound();
-    drink = data;
+    drink = withPhoto(data);
   }
   return (
     <>
