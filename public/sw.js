@@ -9,7 +9,7 @@
   - API requests (/api/*) and Supabase calls are never intercepted, so
     points, scans and redemptions always require a live connection.
 */
-const VERSION = "pb-v2";
+const VERSION = "pb-v3";
 const STATIC_CACHE = `${VERSION}-static`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/brand/palmbite-wordmark.svg", "/brand/palmbite-mark.svg", "/icons/icon-192.png"];
@@ -38,6 +38,7 @@ function isStaticAsset(url) {
     (url.pathname.startsWith("/_next/static/") ||
       url.pathname.startsWith("/brand/") ||
       url.pathname.startsWith("/photos/") ||
+      url.pathname.startsWith("/art/") ||
       url.pathname.startsWith("/icons/"))
   );
 }

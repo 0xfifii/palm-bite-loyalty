@@ -8,6 +8,6 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     // Everything except static assets, the service worker and the manifest.
-    "/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|brand/|photos/|icons/|fonts/|offline).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|brand/|photos/|art/|icons/|fonts/|offline).*)",
   ],
 };

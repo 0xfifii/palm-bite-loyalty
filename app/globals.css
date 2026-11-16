@@ -155,6 +155,10 @@ body {
 .pb-art .pb-float { animation: pb-float 4.5s ease-in-out infinite; }
 .pb-art .pb-shadow { animation: pb-shadow 4.5s ease-in-out infinite; }
 .pb-art .pb-flake { animation: pb-flake 3.6s ease-out infinite; }
+@keyframes pb-float-img { 0%, 100% { transform: translateY(0) rotate(0deg); } 25% { transform: translateY(-3%) rotate(-1deg); } 50% { transform: translateY(-6%) rotate(0deg); } 75% { transform: translateY(-3%) rotate(1deg); } }
+@keyframes pb-shadow-img { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(0.75); opacity: 0.5; } }
+.pb-art-float { animation: pb-float-img 4.5s ease-in-out infinite; will-change: transform; }
+.pb-art-shadow { animation: pb-shadow-img 4.5s ease-in-out infinite; }
 .pb-art .pb-bob { animation: pb-bob 3.2s ease-in-out infinite; }
 .pb-art .pb-sway { animation: pb-sway 5s ease-in-out infinite; transform-origin: bottom center; }
 .pb-art .pb-steam { animation: pb-steam 2.8s ease-out infinite; }

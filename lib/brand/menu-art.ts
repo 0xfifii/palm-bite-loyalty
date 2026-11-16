@@ -286,7 +286,7 @@ function croissant({ id }: Ctx) {
   for (let i = 0; i < marks.length - 1; i++) {
     edge += ` Q${pt(big, (marks[i] + marks[i + 1]) / 2)} ${pt(O, marks[i + 1])}`;
   }
-  const body = `M${C.x - O.rx + 12} ${C.y + 26} Q${C.x - O.rx - 6} ${C.y + 10} ${pt(O, -84)}${edge} Q${C.x + O.rx + 6} ${C.y + 10} ${C.x + O.rx - 12} ${C.y + 26} Q${C.x + I.rx + 2} ${C.y + 14} ${pt(I, 84)} A${I.rx} ${I.ry} 0 0 0 ${pt(I, -84)} Q${C.x - I.rx - 2} ${C.y + 14} ${C.x - O.rx + 12} ${C.y + 26} Z`;
+  const body = `M${C.x - O.rx + 46} ${C.y + 36} Q${C.x - O.rx - 4} ${C.y + 38} ${pt(O, -84)}${edge} Q${C.x + O.rx + 4} ${C.y + 38} ${C.x + O.rx - 46} ${C.y + 36} Q${C.x + I.rx - 4} ${C.y + 18} ${pt(I, 84)} A${I.rx} ${I.ry} 0 0 0 ${pt(I, -84)} Q${C.x - I.rx + 4} ${C.y + 18} ${C.x - O.rx + 46} ${C.y + 36} Z`;
   const grooves = marks
     .slice(1, -1)
     .map((d) => {

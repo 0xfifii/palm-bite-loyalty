@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Matcha + Potato Waffles",
+    "art": "combo",
+    "accent": "#9DB27C"
+  },
+  {
+    "name": "Potato Waffles",
+    "art": "waffle",
+    "accent": "#D9A45B"
+  },
+  {
+    "name": "Sweet Tooth",
+    "art": "cake",
+    "accent": "#5A3428"
+  },
+  {
+    "name": "Shawarma",
+    "art": "wrap",
+    "accent": "#D9A45B"
+  },
+  {
+    "name": "Matcha",
+    "art": "iced",
+    "accent": "#9DB27C"
+  },
+  {
+    "name": "Our Latte",
+    "art": "hot",
+    "accent": "#D2B48C"
+  },
+  {
+    "name": "Espresso",
+    "art": "hot",
+    "accent": "#5A3E2B"
+  },
+  {
+    "name": "Spring Ice Coffee",
+    "art": "iced",
+    "accent": "#7A5A40"
+  }
+]
