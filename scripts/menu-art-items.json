@@ -1,20 +1,5 @@
 [
   {
-    "name": "Matcha + Potato Waffles",
-    "art": "combo",
-    "accent": "#9DB27C"
-  },
-  {
-    "name": "Potato Waffles",
-    "art": "waffle",
-    "accent": "#D9A45B"
-  },
-  {
-    "name": "Sweet Tooth",
-    "art": "cake",
-    "accent": "#5A3428"
-  },
-  {
     "name": "Shawarma",
     "art": "wrap",
     "accent": "#D9A45B"
