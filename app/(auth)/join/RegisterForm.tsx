@@ -61,20 +61,6 @@ export function RegisterForm() {
         error={f.phone}
         hint="Staff use this to find your card if you can't scan."
       />
-      <Field
-        label="Username"
-        name="username"
-        type="text"
-        autoComplete="username"
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-        required
-        placeholder="tolu_b"
-        defaultValue={v.username}
-        error={f.username}
-        hint="Pick one nobody else has. You can sign in with it instead of your email."
-      />
       <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={v.email} error={f.email} />
       <PasswordField
         label="Password"

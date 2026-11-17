@@ -13,18 +13,7 @@ export function LoginForm({ next }: { next: string }) {
     <form action={action} className="mt-6 space-y-4" noValidate>
       {state.error && <Notice tone="error">{state.error}</Notice>}
       <input type="hidden" name="next" value={next} />
-      <Field
-        label="Email or username"
-        name="identifier"
-        type="text"
-        autoComplete="username"
-        autoCapitalize="none"
-        autoCorrect="off"
-        spellCheck={false}
-        required
-        defaultValue={state.values?.identifier}
-        error={f.identifier}
-      />
+      <Field label="Email" name="email" type="email" autoComplete="email" required defaultValue={state.values?.email} error={f.email} />
       <PasswordField label="Password" name="password" autoComplete="current-password" required error={f.password} />
       <SubmitButton variant="dark" size="lg" full trailingArrow pendingLabel="Signing in...">
         Sign in

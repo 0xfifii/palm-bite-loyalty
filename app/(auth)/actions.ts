@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { clientIp, hashIp, rateLimit } from "@/lib/security";
 import { homeFor, safeNext } from "@/lib/auth";
-import { emailSchema, fieldErrors, passwordSchema, registerSchema, signInSchema, usernameSchema } from "@/lib/validation";
+import { emailSchema, fieldErrors, passwordSchema, registerSchema, signInSchema } from "@/lib/validation";
 
 export type FormState = {
   error?: string;
@@ -34,7 +34,6 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   const values = {
     fullName: String(formData.get("fullName") ?? ""),
     phone: String(formData.get("phone") ?? ""),
-    username: String(formData.get("username") ?? ""),
     email: String(formData.get("email") ?? ""),
   };
   if (await limited("register", 200, 5, 600, values.email)) {
@@ -44,22 +43,20 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   const parsed = registerSchema(DEFAULT_CC).safeParse({ ...values, password: String(formData.get("password") ?? "") });
   if (!parsed.success) return { fields: fieldErrors(parsed.error), values };
 
-  const { fullName, phone, username, email, password } = parsed.data;
+  const { fullName, phone, email, password } = parsed.data;
   const accountType = formData.get("accountType") === "staff" ? "staff" : "fren";
 
   const { data: conflicts, error: conflictError } = await createAdminClient().rpc("registration_conflicts", {
     p_email: email,
     p_phone: phone,
-    p_username: username,
   });
   if (conflictError) console.error("[signup] conflict check failed", conflictError.message);
-  const c = (conflicts ?? {}) as { email_taken?: boolean; phone_taken?: boolean; username_taken?: boolean };
-  if (c.email_taken || c.phone_taken || c.username_taken) {
+  const c = (conflicts ?? {}) as { email_taken?: boolean; phone_taken?: boolean };
+  if (c.email_taken || c.phone_taken) {
     return {
       fields: {
         ...(c.email_taken ? { email: "An account with this email already exists. Try signing in." } : {}),
         ...(c.phone_taken ? { phone: "This phone number is already registered." } : {}),
-        ...(c.username_taken ? { username: "That username is taken. Please pick another." } : {}),
       },
       values,
     };
@@ -71,7 +68,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     password,
     options: {
       // account_type only records a request; staff access needs admin approval.
-      data: { full_name: fullName, phone, username, account_type: accountType },
+      data: { full_name: fullName, phone, account_type: accountType },
       emailRedirectTo: `${serverEnv().NEXT_PUBLIC_SITE_URL}/auth/confirm?next=/home`,
     },
   });
@@ -94,7 +91,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     const msg = /registered|exists/i.test(error.message)
       ? "An account with this email already exists. Try signing in."
       : /database error/i.test(error.message)
-        ? "This email, phone number or username is already taken."
+        ? `This email or phone number is already registered. (Reason: ${error.message.slice(0, 160)})`
         : `We couldn't create your account right now. Please try again. (Reason: ${error.message.slice(0, 160)})`;
     return { error: msg, values };
   }
@@ -105,38 +102,24 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
 }
 
 export async function signInAction(_prev: FormState, formData: FormData): Promise<FormState> {
-  const values = { identifier: String(formData.get("identifier") ?? "") };
+  const values = { email: String(formData.get("email") ?? "") };
   const next = safeNext(formData.get("next"), "");
 
-  if (await limited("signin", 400, 10, 300, values.identifier)) {
+  if (await limited("signin", 400, 10, 300, values.email)) {
     return { error: "Too many sign-in attempts. Please wait a few minutes.", values };
   }
 
-  const parsed = signInSchema.safeParse({ identifier: values.identifier, password: String(formData.get("password") ?? "") });
+  const parsed = signInSchema.safeParse({ email: values.email, password: String(formData.get("password") ?? "") });
   if (!parsed.success) return { fields: fieldErrors(parsed.error), values };
 
-  const mismatch = { error: "That username or email and password don't match our records.", values };
-  let email: string | null = null;
-  if (parsed.data.identifier.includes("@") && !parsed.data.identifier.startsWith("@")) {
-    const e = emailSchema.safeParse(parsed.data.identifier);
-    if (!e.success) return { fields: { identifier: "Please enter a valid email or username." }, values };
-    email = e.data;
-  } else {
-    const u = usernameSchema.safeParse(parsed.data.identifier);
-    if (!u.success) return mismatch;
-    const { data: found } = await createAdminClient().rpc("email_for_username", { p_username: u.data });
-    if (typeof found !== "string" || !found) return mismatch;
-    email = found;
-  }
-
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error || !data.user) {
     const unconfirmed = error && /confirm/i.test(error.message);
     return {
       error: unconfirmed
         ? "Please confirm your email first. Check your inbox for the Palm Bite link."
-        : mismatch.error,
+        : "That email and password don't match our records.",
       values,
     };
   }

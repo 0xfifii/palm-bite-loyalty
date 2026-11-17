@@ -8,7 +8,6 @@ export type Profile = {
   full_name: string;
   phone: string | null;
   email: string;
-  username?: string | null;
   role: UserRole;
   status: AccountStatus;
   created_at: string;

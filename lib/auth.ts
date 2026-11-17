@@ -20,7 +20,7 @@ export const getSession = cache(async () => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, full_name, phone, email, username, role, status, created_at, staff_request")
+    .select("id, full_name, phone, email, role, status, created_at, staff_request")
     .eq("id", user.id)
     .single<Profile>();
 
