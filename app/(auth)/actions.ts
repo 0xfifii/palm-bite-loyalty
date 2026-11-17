@@ -47,11 +47,12 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   const { fullName, phone, username, email, password } = parsed.data;
   const accountType = formData.get("accountType") === "staff" ? "staff" : "fren";
 
-  const { data: conflicts } = await createAdminClient().rpc("registration_conflicts", {
+  const { data: conflicts, error: conflictError } = await createAdminClient().rpc("registration_conflicts", {
     p_email: email,
     p_phone: phone,
     p_username: username,
   });
+  if (conflictError) console.error("[signup] conflict check failed", conflictError.message);
   const c = (conflicts ?? {}) as { email_taken?: boolean; phone_taken?: boolean; username_taken?: boolean };
   if (c.email_taken || c.phone_taken || c.username_taken) {
     return {
@@ -76,6 +77,14 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
   });
 
   if (error) {
+    // Recorded in the hosting logs (Vercel > Logs) so the exact cause is visible.
+    console.error("[signup] failed", error.status, error.code, error.message);
+    if (/rate limit|too many|over_email_send_rate_limit/i.test(`${error.code} ${error.message}`)) {
+      return { error: "Lots of people are joining right now. Please try again in a few minutes.", values };
+    }
+    if (/sending|smtp|email.*(send|deliver)/i.test(error.message)) {
+      return { error: "We couldn't send your confirmation email. Please try again shortly or ask a Palm Bite team member.", values };
+    }
     const msg = /registered|exists/i.test(error.message)
       ? "An account with this email already exists. Try signing in."
       : /database error/i.test(error.message)
