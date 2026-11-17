@@ -13,24 +13,24 @@ export default async function CommunityPage() {
   const events = items.filter((i) => i.kind === "event");
   const clubs = items.filter((i) => i.kind === "club");
   return (
-    <main className="px-5 pt-[calc(var(--safe-top)+1.25rem)]">
+    <main className="px-5 md:px-8 pt-[calc(var(--safe-top)+1.25rem)]">
       <p className="text-sm font-semibold text-olive">palm way, our way</p>
       <h1 className="type-display mt-1 text-[2.6rem] text-olive-deep uppercase">Community</h1>
       <p className="mt-2 text-muted">More than coffee. Move, read and hang out with the Palm Bite family.</p>
 
-      <section className="mt-6" aria-label="Follow Palm Bite">
+      <section className="mt-6 md:max-w-xl" aria-label="Follow Palm Bite">
         <SocialLinks whatsappChat={business.order_link} />
       </section>
 
       {events.length > 0 && (
-        <section className="mt-6 space-y-3" aria-label="Events">
+        <section className="mt-6 grid gap-3 md:grid-cols-2" aria-label="Events">
           {events.map((e) => (
             <CommunityCard key={e.id} item={e} />
           ))}
         </section>
       )}
 
-      <section className="mt-6 space-y-3" aria-label="Clubs">
+      <section className="mt-6 grid gap-3 md:grid-cols-2" aria-label="Clubs">
         {clubs.length === 0 ? (
           <p className="rounded-[var(--radius-card)] bg-surface p-5 text-muted">Clubs are coming soon.</p>
         ) : (

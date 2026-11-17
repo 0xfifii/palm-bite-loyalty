@@ -24,11 +24,13 @@ export default async function RewardsPage() {
     : null;
 
   return (
-    <main className="px-5 pt-[calc(var(--safe-top)+1.5rem)]">
+    <main className="px-5 md:px-8 pt-[calc(var(--safe-top)+1.5rem)]">
       <h1 className="type-display text-[3rem] text-olive-deep uppercase">Rewards</h1>
       <p className="mt-1 text-muted">One visit a day earns a point. Fifteen points earns a free drink.</p>
 
-      <div className="mt-6">
+      <div className="md:mt-6 md:grid md:grid-cols-2 md:items-start md:gap-8">
+      <div>
+      <div className="mt-6 md:mt-0">
         <LoyaltyCard
           points={account?.current_points ?? 0}
           cycle={account?.cycle_number ?? 1}
@@ -59,7 +61,9 @@ export default async function RewardsPage() {
         </div>
       </dl>
 
-      <section className="mt-8" aria-labelledby="open-heading">
+      </div>
+      <div>
+      <section className="mt-8 md:mt-0" aria-labelledby="open-heading">
         <h2 id="open-heading" className="type-heading text-xl">
           Your reward
         </h2>
@@ -165,6 +169,8 @@ export default async function RewardsPage() {
           </ul>
         )}
       </section>
+      </div>
+      </div>
     </main>
   );
 }

@@ -162,7 +162,7 @@ export function ScanExperience({
   );
 
   return (
-    <main className="flex min-h-[calc(100dvh-7rem)] flex-col px-5 pt-[calc(var(--safe-top)+1.25rem)]">
+    <main className="mx-auto w-full max-w-xl flex min-h-[calc(100dvh-7rem)] flex-col px-5 pt-[calc(var(--safe-top)+1.25rem)]">
       <header className="flex items-center justify-between">
         <Link href="/home" aria-label="Back to home" className="grid size-11 place-items-center rounded-full bg-surface shadow-soft">
           <Icon name="back" />

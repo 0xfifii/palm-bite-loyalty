@@ -11,7 +11,7 @@ export default async function MenuPage({ searchParams }: { searchParams: Promise
   const { sections, merch } = groupMenu(items);
   return (
     <main className="pt-[calc(var(--safe-top)+1.25rem)]">
-      <div className="px-5">
+      <div className="px-5 md:px-8">
         <p className="text-sm font-semibold text-olive">pour. sip. stay a while.</p>
         <h1 className="type-display mt-1 text-[3rem] text-olive-deep uppercase">Menu</h1>
       </div>

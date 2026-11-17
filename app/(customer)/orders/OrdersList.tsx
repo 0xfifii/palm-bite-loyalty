@@ -140,7 +140,7 @@ export function OrdersList({
               <h2 id="open-orders" className="type-heading text-xl">
                 In progress
               </h2>
-              <ul className="mt-3 space-y-3">{open.map(card)}</ul>
+              <ul className="mt-3 grid gap-3 md:grid-cols-2">{open.map(card)}</ul>
             </section>
           )}
           {past.length > 0 && (
@@ -148,7 +148,7 @@ export function OrdersList({
               <h2 id="past-orders" className="type-heading text-xl">
                 Past orders
               </h2>
-              <ul className="mt-3 space-y-3">{past.map(card)}</ul>
+              <ul className="mt-3 grid gap-3 md:grid-cols-2">{past.map(card)}</ul>
             </section>
           )}
         </>

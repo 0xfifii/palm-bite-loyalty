@@ -7,7 +7,7 @@ export default async function CustomerLayout({ children }: { children: React.Rea
   await requireUser();
   return (
     <div className="min-h-dvh bg-sage-soft">
-      <div className="mx-auto min-h-dvh w-full max-w-md bg-cream pb-[calc(var(--safe-bottom)+7rem)] md:shadow-lift">
+      <div className="mx-auto min-h-dvh w-full max-w-md md:max-w-3xl lg:max-w-5xl bg-cream pb-[calc(var(--safe-bottom)+7rem)] md:shadow-lift">
         {children}
       </div>
       <BottomNav />

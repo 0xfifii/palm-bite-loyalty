@@ -53,7 +53,7 @@ export function OrderReview({ menu, address }: { menu: MenuItem[]; address: stri
 
   if (placed) {
     return (
-      <main className="flex min-h-[calc(100dvh-7rem)] flex-col px-5 pt-[calc(var(--safe-top)+1.5rem)]">
+      <main className="mx-auto w-full max-w-xl flex min-h-[calc(100dvh-7rem)] flex-col px-5 pt-[calc(var(--safe-top)+1.5rem)]">
         <div className="flex flex-1 flex-col items-center text-center">
           <span className="animate-stamp-pop grid size-20 place-items-center rounded-full bg-peach text-olive-deep">
             <Icon name="check" className="size-10" />
@@ -113,7 +113,7 @@ export function OrderReview({ menu, address }: { menu: MenuItem[]; address: stri
   }
 
   return (
-    <main className="px-5 pt-[calc(var(--safe-top)+1.25rem)]">
+    <main className="mx-auto w-full max-w-xl px-5 pt-[calc(var(--safe-top)+1.25rem)]">
       <header className="flex items-center justify-between">
         <Link href="/menu" aria-label="Back to menu" className="grid size-11 place-items-center rounded-full bg-surface shadow-soft">
           <Icon name="back" />

@@ -66,7 +66,7 @@ export function ChooseDrink({ rewardId, drinks }: { rewardId: string; drinks: Dr
 
   if (drinks.length === 0) {
     return (
-      <main className="px-5 pt-[calc(var(--safe-top)+1.5rem)]">
+      <main className="mx-auto w-full max-w-xl px-5 pt-[calc(var(--safe-top)+1.5rem)]">
         <BackLink />
         <p className="mt-8 rounded-[var(--radius-card)] bg-surface p-5 text-muted">
           No reward drinks are available right now. Please ask a team member, your reward is safe.
@@ -77,7 +77,7 @@ export function ChooseDrink({ rewardId, drinks }: { rewardId: string; drinks: Dr
 
   if (step === "done" && done) {
     return (
-      <main className="flex min-h-[calc(100dvh-7rem)] flex-col px-5 pt-[calc(var(--safe-top)+1.5rem)] text-center">
+      <main className="mx-auto w-full max-w-xl flex min-h-[calc(100dvh-7rem)] flex-col px-5 pt-[calc(var(--safe-top)+1.5rem)] text-center">
         <div className="flex flex-1 flex-col items-center justify-center">
           <span className="grid size-20 place-items-center rounded-full bg-peach text-olive-deep">
             <Icon name="check" className="size-10" />
@@ -94,7 +94,7 @@ export function ChooseDrink({ rewardId, drinks }: { rewardId: string; drinks: Dr
   }
 
   return (
-    <main className="relative flex min-h-[calc(100dvh-7rem)] flex-col bg-cream-deep">
+    <main className="mx-auto w-full max-w-xl relative flex min-h-[calc(100dvh-7rem)] flex-col bg-cream-deep">
       {/* Hero: faded name behind the drink, after the reference design */}
       <section className="relative h-[19rem] overflow-hidden px-5 pt-[calc(var(--safe-top)+1.25rem)]">
         <BackLink />

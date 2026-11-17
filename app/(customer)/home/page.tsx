@@ -26,7 +26,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const showcase = (picks.length ? [...picks, ...gems] : drinks).slice(0, 8);
 
   return (
-    <main className="px-5 pt-[calc(var(--safe-top)+1.25rem)]">
+    <main className="px-5 md:px-8 pt-[calc(var(--safe-top)+1.25rem)]">
       <header className="flex items-center justify-between">
         <Mark height={34} className="text-olive" />
         <Link
@@ -43,13 +43,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/photos/melis.jpg" alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_35%] opacity-80" />
         <div className="absolute inset-0 bg-gradient-to-t from-olive-night via-olive-night/55 to-transparent" />
-        <div className="relative flex min-h-[23rem] flex-col justify-end p-6">
+        <div className="relative flex min-h-[23rem] flex-col justify-end p-6 md:min-h-[26rem] md:p-10">
           <p className="text-sm font-semibold text-peach">pour. sip. stay a while.</p>
-          <h1 id="hero-heading" className="type-display mt-2 text-[2.6rem] leading-[0.92] uppercase">
+          <h1 id="hero-heading" className="type-display mt-2 text-[2.6rem] leading-[0.92] uppercase md:max-w-xl md:text-[3.6rem]">
             Hi {firstName(profile.full_name)}, welcome to Palm Bite
           </h1>
           <p className="mt-3 max-w-[18rem] text-cream/85">Signature Gems, fresh juice, Slab and pastries. Made the Palm way.</p>
-          <div className="mt-5 grid grid-cols-2 gap-3">
+          <div className="mt-5 grid grid-cols-2 gap-3 md:max-w-md">
             <ButtonLink href="/menu" variant="peach" size="lg" icon="bag" full>
               Order now
             </ButtonLink>
@@ -90,11 +90,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         )}
       </section>
 
-      <div className="mt-9">
+      <div className="md:mt-9 md:grid md:grid-cols-2 md:items-start md:gap-6">
+      <div className="mt-9 md:mt-0">
         <AboutPalmBite address={business.store_address} />
       </div>
 
-      <section className="mt-9" aria-labelledby="community-heading">
+      <section className="mt-9 md:mt-0" aria-labelledby="community-heading">
         <div className="flex items-end justify-between">
           <h2 id="community-heading" className="type-heading text-xl">
             The Palm community
@@ -108,7 +109,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <SocialLinks whatsappChat={business.order_link} />
         </div>
         {community.length > 0 && (
-          <div className="no-scrollbar -mx-5 mt-4 flex snap-x scroll-px-5 gap-3 overflow-x-auto px-5 pb-2">
+          <div className="no-scrollbar -mx-5 mt-4 flex snap-x scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 md:-mx-8 md:scroll-px-8 md:px-8">
             {community.map((c) => (
               <Link key={c.id} href="/community" className="block w-72 shrink-0 snap-start">
                 <CommunityCard item={c} compact />
@@ -117,6 +118,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </div>
         )}
       </section>
+      </div>
 
       {merch.length > 0 && (
         <section className="mt-9" aria-labelledby="merch-heading">
@@ -150,12 +152,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
 function Shelf({ items, href, contain = false }: { items: Drink[]; href: string; contain?: boolean }) {
   return (
-    <ul className="no-scrollbar -mx-5 mt-4 flex snap-x scroll-px-5 gap-3 overflow-x-auto px-5 pb-2">
+    <ul className="no-scrollbar -mx-5 mt-4 flex snap-x scroll-px-5 gap-3 overflow-x-auto px-5 pb-2 md:-mx-8 md:scroll-px-8 md:px-8">
       {items.map((d) => (
-        <li key={d.id} className="w-36 shrink-0 snap-start">
+        <li key={d.id} className="w-36 shrink-0 snap-start md:w-44">
           <Link href={href} className="block">
             <div
-              className={`h-44 overflow-hidden rounded-[var(--radius-card)] ${d.image_url ? "" : "p-2"}`}
+              className={`h-44 overflow-hidden md:h-52 rounded-[var(--radius-card)] ${d.image_url ? "" : "p-2"}`}
               style={{ background: contain && d.image_url ? "#ffffff" : `${d.accent_color === "#1D2119" ? "#A9B89A" : d.accent_color}33` }}
             >
               <DrinkImage name={d.name} imageUrl={d.image_url} accent={d.accent_color} art={d.art} id={d.id} fit={contain ? "contain" : "cover"} />

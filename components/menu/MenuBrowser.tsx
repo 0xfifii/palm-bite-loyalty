@@ -29,8 +29,8 @@ export function MenuBrowser({
 
   return (
     <>
-      <div className="sticky top-0 z-20 bg-cream/95 px-5 pt-3 pb-3 backdrop-blur">
-        <div className="grid grid-cols-2 rounded-full bg-surface p-1" role="tablist" aria-label="Menu or merch">
+      <div className="sticky top-0 z-20 bg-cream/95 px-5 md:px-8 pt-3 pb-3 backdrop-blur">
+        <div className="grid grid-cols-2 rounded-full bg-surface p-1 md:max-w-sm" role="tablist" aria-label="Menu or merch">
           {(["menu", "merch"] as const).map((t) => (
             <button
               key={t}
@@ -44,7 +44,7 @@ export function MenuBrowser({
           ))}
         </div>
         {tab === "menu" && sections.length > 0 && (
-          <nav className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5" aria-label="Menu sections">
+          <nav className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 md:-mx-8 md:px-8" aria-label="Menu sections">
             {sections.map((s) => (
               <a key={s.key} href={`#${slug(s.key)}`} className="h-9 shrink-0 rounded-full border border-line bg-surface px-4 text-sm leading-9 font-medium hover:border-ink/30">
                 {s.title}
@@ -59,14 +59,14 @@ export function MenuBrowser({
           <p className="mx-5 mt-6 rounded-[var(--radius-card)] bg-surface p-5 text-muted">The menu is being prepared. Check back soon.</p>
         ) : (
           sections.map((s) => (
-            <section key={s.key} id={slug(s.key)} className="scroll-mt-32 px-5 pt-6" aria-labelledby={`h-${slug(s.key)}`}>
+            <section key={s.key} id={slug(s.key)} className="scroll-mt-32 px-5 pt-6 md:px-8" aria-labelledby={`h-${slug(s.key)}`}>
               <div className="flex items-baseline justify-between">
                 <h2 id={`h-${slug(s.key)}`} className="type-heading text-2xl">
                   {s.title}
                 </h2>
                 {s.blurb && <p className="text-sm text-muted">{s.blurb}</p>}
               </div>
-              <ul className={`mt-3 grid gap-3 ${s.key === "Our Picks" ? "grid-cols-1" : "grid-cols-2"}`}>
+              <ul className={`mt-3 grid gap-3 ${s.key === "Our Picks" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}>
                 {s.items.map((d) => (
                   <li key={d.id}>
                     <ItemCard d={d} qty={qty.get(d.id) ?? 0} wide={s.key === "Our Picks"} />
@@ -77,7 +77,7 @@ export function MenuBrowser({
           ))
         )
       ) : (
-        <section className="px-5 pt-5" aria-label="Merch">
+        <section className="px-5 pt-5 md:px-8" aria-label="Merch">
           <div className="rounded-[var(--radius-card)] bg-olive-deep p-5 text-cream">
             <p className="type-heading text-xl">Merch 1.0</p>
             <p className="mt-1 text-sm text-cream/80">Pick it up in store at {address}. Add pieces to your order and pay when you collect.</p>
@@ -85,7 +85,7 @@ export function MenuBrowser({
           {merch.length === 0 ? (
             <p className="mt-4 rounded-[var(--radius-card)] bg-surface p-5 text-muted">New merch is on its way.</p>
           ) : (
-            <ul className="mt-4 grid grid-cols-2 gap-3">
+            <ul className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {merch.map((d) => (
                 <li key={d.id}>
                   <ItemCard d={d} qty={qty.get(d.id) ?? 0} />

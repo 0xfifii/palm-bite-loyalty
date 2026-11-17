@@ -16,7 +16,7 @@ export default async function ProfilePage() {
   const a = data.account;
 
   return (
-    <main className="px-5 pt-[calc(var(--safe-top)+1.5rem)]">
+    <main className="px-5 md:px-8 pt-[calc(var(--safe-top)+1.5rem)]">
       <div className="flex items-center gap-4">
         <span className="grid size-16 place-items-center rounded-full bg-olive-deep text-xl font-bold text-peach">{initials(profile.full_name)}</span>
         <div>
@@ -25,7 +25,7 @@ export default async function ProfilePage() {
         </div>
       </div>
 
-      <dl className="mt-6 grid grid-cols-3 gap-2 text-center">
+      <dl className="mt-6 grid grid-cols-3 gap-2 text-center md:max-w-xl">
         {[
           ["Current points", a?.current_points ?? 0],
           ["Verified visits", a?.total_visits ?? 0],
@@ -48,14 +48,16 @@ export default async function ProfilePage() {
         </Link>
       )}
 
-      <section className="mt-8 rounded-[var(--radius-card)] bg-surface p-5" aria-labelledby="details-heading">
+      <div className="md:mt-8 md:grid md:grid-cols-2 md:items-start md:gap-6">
+      <section className="mt-8 rounded-[var(--radius-card)] bg-surface p-5 md:mt-0" aria-labelledby="details-heading">
         <h2 id="details-heading" className="type-heading mb-4 text-lg">
           Your details
         </h2>
         <ProfileForm fullName={profile.full_name} phone={profile.phone} email={profile.email} />
       </section>
 
-      <nav className="mt-4 divide-y divide-line rounded-[var(--radius-card)] bg-surface px-5" aria-label="Your history">
+      <div>
+      <nav className="mt-4 divide-y md:mt-0 divide-line rounded-[var(--radius-card)] bg-surface px-5" aria-label="Your history">
         <Link href="/orders" className="flex items-center justify-between py-4 font-medium">
           Your orders <Icon name="arrow" className="size-4 text-muted" />
         </Link>
@@ -78,7 +80,10 @@ export default async function ProfilePage() {
         <InstallButton variant="dark" />
       </section>
 
-      <form action={signOutAction} className="mt-6">
+      </div>
+      </div>
+
+      <form action={signOutAction} className="mt-6 md:max-w-sm">
         <button className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-ink/15 font-semibold hover:border-ink/35">
           <Icon name="logout" /> Sign out
         </button>

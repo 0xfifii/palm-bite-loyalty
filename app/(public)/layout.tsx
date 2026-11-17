@@ -14,9 +14,9 @@ export default async function PublicLayout({ children }: { children: React.React
   const signedIn = Boolean(user && profile?.status === "active");
   return (
     <div className="min-h-dvh bg-sage-soft">
-      <div className={`mx-auto min-h-dvh w-full max-w-md bg-cream md:shadow-lift ${signedIn ? "pb-[calc(var(--safe-bottom)+7rem)]" : "pb-28"}`}>
+      <div className={`mx-auto min-h-dvh w-full max-w-md md:max-w-3xl lg:max-w-5xl bg-cream md:shadow-lift ${signedIn ? "pb-[calc(var(--safe-bottom)+7rem)]" : "pb-28"}`}>
         {!signedIn && (
-          <header className="sticky top-0 z-30 flex items-center justify-between bg-olive px-5 pt-[calc(var(--safe-top)+0.75rem)] pb-3 text-cream">
+          <header className="sticky top-0 z-30 flex items-center justify-between bg-olive px-5 md:px-8 pt-[calc(var(--safe-top)+0.75rem)] pb-3 text-cream">
             <Link href="/" aria-label="Palm Bite home" className="text-peach">
               <Wordmark height={24} />
             </Link>

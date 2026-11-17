@@ -17,7 +17,7 @@ export default async function OrdersPage() {
   const orders = (data ?? []) as Order[];
   const tz = settings?.business_timezone ?? "Africa/Lagos";
   return (
-    <main className="px-5 pt-[calc(var(--safe-top)+1.5rem)]">
+    <main className="px-5 md:px-8 pt-[calc(var(--safe-top)+1.5rem)]">
       <h1 className="type-display text-[3rem] text-olive-deep uppercase">Orders</h1>
       <p className="mt-1 text-muted">Order from the menu and keep track of everything you&apos;ve ordered.</p>
       <OrdersList
