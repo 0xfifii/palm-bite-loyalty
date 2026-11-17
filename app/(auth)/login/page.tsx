@@ -4,7 +4,7 @@ import { LoginForm } from "./LoginForm";
 import { Notice } from "@/components/ui/Field";
 import { safeNext } from "@/lib/auth";
 
-export const metadata: Metadata = { title: "Welcome back" };
+export const metadata: Metadata = { title: "Welcome back", robots: { index: false, follow: true } };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;

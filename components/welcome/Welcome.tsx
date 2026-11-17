@@ -9,7 +9,7 @@ export function Welcome() {
   return (
     <main className="min-h-dvh bg-sage-soft md:grid md:place-items-center md:p-8">
       <Splash />
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col overflow-hidden bg-olive md:min-h-[860px] md:rounded-[2.75rem] md:shadow-lift">
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col overflow-hidden bg-olive md:min-h-[min(860px,calc(100dvh-4rem))] md:rounded-[2.75rem] md:shadow-lift">
         {/* Hero */}
         <section className="relative flex flex-1 flex-col items-center px-6 pt-[calc(var(--safe-top)+1.75rem)]">
           <div className="text-peach">
@@ -39,9 +39,10 @@ export function Welcome() {
 
         {/* Sheet */}
         <section className="relative z-10 -mt-6 rounded-t-[var(--radius-sheet)] bg-surface px-6 pt-8 pb-[calc(var(--safe-bottom)+1.75rem)] text-center">
-          <h1 className="type-heading text-[2rem] text-ink">Good taste deserves rewards.</h1>
-          <p className="mx-auto mt-3 max-w-[19rem] text-[1.02rem] leading-relaxed text-muted">
-            Every visit brings you closer to your next Palm Bite favourite.
+          <h1 className="text-sm font-semibold tracking-wide text-olive-deep uppercase">Palm Bite Cafe, a social community cafe</h1>
+          <p className="type-heading mt-2 text-[2rem] text-ink">Good taste deserves rewards.</p>
+          <p className="mx-auto mt-3 max-w-[20rem] text-[1.02rem] leading-relaxed text-muted">
+            Coffee, fresh juice, pastries, clubs and good people. Every visit brings you closer to your next Palm Bite favourite.
           </p>
           <div className="mt-7 flex flex-col gap-3">
             <ButtonLink href="/join" variant="dark" size="lg" trailingArrow full>

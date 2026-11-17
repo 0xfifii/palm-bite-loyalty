@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import { QrDisplay } from "@/components/qr/QrDisplay";
 
-export const metadata: Metadata = { title: "Visit QR display" };
+export const metadata: Metadata = { title: "Visit QR display", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function DisplayPage() {

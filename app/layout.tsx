@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { ServiceWorker } from "@/components/pwa/ServiceWorker";
+import { KEYWORDS, SITE_DESCRIPTION, SITE_NAME, SITE_URL, TAGLINE } from "@/lib/seo";
 
 const archivo = localFont({
   src: "./fonts/archivo-variable.woff2",
@@ -18,11 +19,29 @@ const dmSans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: "Palm Bite Loyalty", template: "%s | Palm Bite Loyalty" },
-  description: "Collect a point every visit. Fifteen visits earns a free Palm Bite drink.",
-  applicationName: "Palm Bite Loyalty",
+  metadataBase: new URL(SITE_URL),
+  title: { default: `${SITE_NAME} | ${TAGLINE}`, template: `%s | ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  keywords: KEYWORDS,
+  applicationName: SITE_NAME,
+  authors: [{ name: "Palm Bite" }],
+  creator: "Palm Bite",
+  publisher: "Palm Bite",
+  category: "food and drink",
+  alternates: { canonical: "/" },
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Palm Bite", statusBarStyle: "default" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} | ${TAGLINE}`,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    locale: "en_NG",
+  },
+  twitter: { card: "summary_large_image", title: `${SITE_NAME} | ${TAGLINE}`, description: SITE_DESCRIPTION },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION } : undefined,
   icons: {
     icon: [
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -42,7 +61,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-GB" className={`${archivo.variable} ${dmSans.variable}`}>
+    <html lang="en-NG" className={`${archivo.variable} ${dmSans.variable}`}>
       <body className="min-h-dvh">
         {children}
         <ServiceWorker />

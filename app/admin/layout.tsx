@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import { requireRole } from "@/lib/auth";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { signOutAction } from "@/app/(auth)/actions";
+
+
+/** Private screens stay out of search results. */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export const dynamic = "force-dynamic";
 

@@ -5,7 +5,13 @@ import { CommunityCard } from "@/components/community/CommunityCard";
 import { Icon } from "@/components/ui/Icon";
 import { SocialLinks } from "@/components/community/SocialLinks";
 
-export const metadata: Metadata = { title: "Community" };
+export const metadata: Metadata = {
+  title: "Community: Palm Fitness Club, Palm Book Club and events",
+  description:
+    "Palm Bite is a social community cafe. Move with the Palm Fitness Club, read with the Palm Book Club, join our events and follow us on Instagram, TikTok and WhatsApp.",
+  alternates: { canonical: "/community" },
+  openGraph: { url: "/community", title: "The Palm Bite community" },
+};
 
 export default async function CommunityPage() {
   const supabase = await createClient();

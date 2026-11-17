@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import { BottomNav } from "@/components/customer/BottomNav";
 import { requireUser } from "@/lib/auth";
+
+
+/** Private screens stay out of search results. */
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export const dynamic = "force-dynamic";
 

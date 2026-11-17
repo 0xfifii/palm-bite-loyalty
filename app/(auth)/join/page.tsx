@@ -2,7 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { RegisterForm } from "./RegisterForm";
 
-export const metadata: Metadata = { title: "Join the Club" };
+export const metadata: Metadata = {
+  title: "Join the Club",
+  description: "Join Palm Bite Cafe as a Palm Fren. Collect a point every visit and get a free drink every fifteen visits.",
+  alternates: { canonical: "/join" },
+};
 
 export default function JoinPage() {
   return (

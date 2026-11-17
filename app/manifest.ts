@@ -3,13 +3,13 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Palm Bite Loyalty",
+    name: "Palm Bite Cafe",
     short_name: "Palm Bite",
-    description: "Collect a point every visit. Fifteen visits earns a free Palm Bite drink.",
+    description: "Palm Bite Cafe, a social community cafe. Order, join our clubs and earn a free drink every fifteen visits.",
     start_url: "/home",
     scope: "/",
     display: "standalone",
-    orientation: "portrait",
+    orientation: "any",
     background_color: "#5d724b",
     theme_color: "#5d724b",
     categories: ["food", "lifestyle"],
