@@ -82,6 +82,12 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
     if (/rate limit|too many|over_email_send_rate_limit/i.test(`${error.code} ${error.message}`)) {
       return { error: "Lots of people are joining right now. Please try again in a few minutes.", values };
     }
+    if (error.code === "weak_password" || /password/i.test(error.message)) {
+      return { fields: { password: "Please use a stronger password: at least 8 characters with a letter and a number." }, values };
+    }
+    if (/signups? not allowed|signup.*disabled/i.test(error.message)) {
+      return { error: "New sign-ups are switched off. Please ask a Palm Bite team member.", values };
+    }
     if (/sending|smtp|email.*(send|deliver)/i.test(error.message)) {
       return { error: "We couldn't send your confirmation email. Please try again shortly or ask a Palm Bite team member.", values };
     }
@@ -89,7 +95,7 @@ export async function registerAction(_prev: FormState, formData: FormData): Prom
       ? "An account with this email already exists. Try signing in."
       : /database error/i.test(error.message)
         ? "This email, phone number or username is already taken."
-        : "We couldn't create your account right now. Please try again.";
+        : `We couldn't create your account right now. Please try again. (Reason: ${error.message.slice(0, 160)})`;
     return { error: msg, values };
   }
 
