@@ -61,9 +61,9 @@ describe("phone numbers", () => {
 describe("registration validation", () => {
   const schema = registerSchema();
   it("accepts a valid customer", () => {
-    const r = schema.safeParse({ fullName: "Tolu Bello", phone: "08031234567", email: "TOLU@Example.com ", password: "Palmbite1" });
+    const r = schema.safeParse({ fullName: "Tolu Bello", phone: "08031234567", username: "@Tolu_B", email: "TOLU@Example.com ", password: "Palmbite1" });
     expect(r.success).toBe(true);
-    if (r.success) expect(r.data.email).toBe("tolu@example.com");
+    if (r.success) { expect(r.data.email).toBe("tolu@example.com"); expect(r.data.username).toBe("tolu_b"); }
   });
   it("rejects weak passwords and odd names", () => {
     expect(schema.safeParse({ fullName: "Tolu", phone: "08031234567", email: "a@b.co", password: "password" }).success).toBe(false);

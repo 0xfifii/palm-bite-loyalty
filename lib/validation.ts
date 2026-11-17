@@ -38,6 +38,26 @@ export const nameSchema = z
 
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Please enter a valid email address.")).refine((v) => v.length <= 254);
 
+const RESERVED_USERNAMES = new Set([
+  "admin", "administrator", "staff", "palmstaff", "palmbite", "palm_bite", "palm.bite",
+  "palmbitecafe", "palmbite_cafe", "support", "help", "root", "owner", "manager", "system", "official",
+]);
+
+/** Usernames: 3 to 20 lowercase letters, numbers, dots or underscores. */
+export const usernameSchema = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/^@/, "").toLowerCase())
+  .pipe(
+    z
+      .string()
+      .min(3, "Use at least 3 characters.")
+      .max(20, "Use at most 20 characters.")
+      .regex(/^[a-z0-9][a-z0-9._]*[a-z0-9]$/, "Use letters, numbers, dots or underscores, starting and ending with a letter or number.")
+      .refine((v) => !/[._]{2}/.test(v), "Don't put two dots or underscores together.")
+      .refine((v) => !RESERVED_USERNAMES.has(v), "That username is reserved. Please pick another."),
+  );
+
 export const passwordSchema = z
   .string()
   .min(8, "Use at least 8 characters.")
@@ -63,13 +83,15 @@ export function registerSchema(defaultCountryCode = "234") {
   return z.object({
     fullName: nameSchema,
     phone: phoneSchema(defaultCountryCode),
+    username: usernameSchema,
     email: emailSchema,
     password: passwordSchema,
   });
 }
 
+/** Sign in with an email address or a username. */
 export const signInSchema = z.object({
-  email: emailSchema,
+  identifier: z.string().trim().min(1, "Please enter your email or username.").max(254),
   password: z.string().min(1, "Please enter your password.").max(72),
 });
 

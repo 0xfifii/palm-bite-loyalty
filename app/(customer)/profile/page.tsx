@@ -21,6 +21,7 @@ export default async function ProfilePage() {
         <span className="grid size-16 place-items-center rounded-full bg-olive-deep text-xl font-bold text-peach">{initials(profile.full_name)}</span>
         <div>
           <h1 className="type-heading text-2xl">{profile.full_name}</h1>
+          {profile.username && <p className="font-semibold text-olive-deep">@{profile.username}</p>}
           <p className="text-sm text-muted">Member since {formatDate(profile.created_at, data.timezone)}</p>
         </div>
       </div>
@@ -53,7 +54,7 @@ export default async function ProfilePage() {
         <h2 id="details-heading" className="type-heading mb-4 text-lg">
           Your details
         </h2>
-        <ProfileForm fullName={profile.full_name} phone={profile.phone} email={profile.email} />
+        <ProfileForm fullName={profile.full_name} phone={profile.phone} email={profile.email} username={profile.username ?? null} />
       </section>
 
       <div>
