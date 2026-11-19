@@ -49,7 +49,7 @@ export function AdminShell({ name, signOut, children }: { name: string; signOut:
       <Link href="/staff" className="flex items-center gap-2 rounded-xl px-4 py-2 text-cream/80 hover:text-cream">
         <Icon name="gift" className="size-4" /> Staff tools
       </Link>
-      <Link href="/home" className="flex items-center gap-2 rounded-xl px-4 py-2 text-cream/80 hover:text-cream">
+      <Link href="/home?view=fren" className="flex items-center gap-2 rounded-xl px-4 py-2 text-cream/80 hover:text-cream">
         <Icon name="phone" className="size-4" /> Customer app
       </Link>
       <form action={signOut}>

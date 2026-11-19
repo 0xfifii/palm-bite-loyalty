@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Palm Bite Cafe",
     short_name: "Palm Bite",
     description: "Palm Bite Cafe, a social community cafe. Order, join our clubs and earn a free drink every fifteen visits.",
-    start_url: "/home",
+    start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "any",

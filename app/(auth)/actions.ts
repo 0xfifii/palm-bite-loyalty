@@ -130,7 +130,8 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
     return { error: "This account is paused. Please speak with a Palm Bite team member.", values };
   }
 
-  redirect(next || homeFor(profile.role));
+  // A link back to the Palm Fren home should not keep staff or admins there.
+  redirect(next && next !== "/home" ? next : homeFor(profile.role));
 }
 
 export async function forgotPasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {

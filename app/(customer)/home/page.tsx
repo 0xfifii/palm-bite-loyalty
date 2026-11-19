@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { requireUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { homeFor, requireUser } from "@/lib/auth";
 import { loadBusiness, loadCommunity, loadDrinks } from "@/lib/loyalty/queries";
 import { CommunityCard } from "@/components/community/CommunityCard";
 import { AboutPalmBite } from "@/components/community/AboutPalmBite";
@@ -16,9 +17,12 @@ import type { Drink } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Home" };
 
-export default async function HomePage({ searchParams }: { searchParams: Promise<{ password?: string }> }) {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ password?: string; view?: string }> }) {
   const { supabase, profile } = await requireUser("/home");
   const sp = await searchParams;
+  // Staff and admins land on their own tools; they can still open the
+  // Palm Fren view with ?view=fren (linked from their dashboards).
+  if (profile.role !== "customer" && sp.view !== "fren") redirect(homeFor(profile.role));
   const [drinks, community, business] = await Promise.all([loadDrinks(supabase), loadCommunity(supabase), loadBusiness(supabase)]);
   const picks = drinks.filter((d) => d.item_type === "pick");
   const gems = drinks.filter((d) => d.category === "Gems");
