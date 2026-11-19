@@ -209,7 +209,7 @@ export function ScanExperience({
 
       {phase.name === "camera" && (
         <section className="mt-5 flex flex-1 flex-col">
-          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-sheet)] bg-olive-night">
+          <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[var(--radius-sheet)] bg-olive-night landscape:aspect-auto landscape:h-[62dvh]">
             <QrCamera className="absolute inset-0" onDecode={onDecode} onStatus={setCameraStatus} />
             {cameraStatus === "scanning" && (
               <div className="pointer-events-none absolute inset-0 grid place-items-center" aria-hidden="true">

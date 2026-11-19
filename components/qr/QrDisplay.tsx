@@ -130,7 +130,7 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
   const C = 2 * Math.PI * R;
 
   return (
-    <main className="relative flex min-h-dvh flex-col items-center bg-olive px-6 py-8 pb-12 text-cream">
+    <main className="relative flex min-h-dvh flex-col items-center bg-olive px-6 py-8 pb-12 text-cream md:landscape:py-5 md:landscape:pb-6">
       <div className="absolute top-4 right-4 flex gap-2">
         <button
           onClick={() => document.documentElement.requestFullscreen?.().catch(() => undefined)}
@@ -143,17 +143,17 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
         </Link>
       </div>
 
-      <div className="mt-6 text-peach">
+      <div className="mt-6 text-peach md:landscape:mt-2">
         <Wordmark height={44} />
       </div>
 
-      <h1 className="type-display mt-6 max-w-4xl text-center text-[clamp(2rem,5vw,4rem)] text-cream uppercase">
+      <h1 className="type-display mt-6 max-w-4xl text-center text-[clamp(2rem,5vw,4rem)] text-cream uppercase md:landscape:mt-3 md:landscape:text-[clamp(1.75rem,4vw,3rem)]">
         Scan to Collect Your Palm Bite Point.
       </h1>
 
-      <div className="mt-10 flex flex-1 flex-col items-center gap-10 lg:flex-row lg:items-start lg:gap-12">
+      <div className="mt-10 flex flex-1 flex-col items-center gap-10 md:landscape:mt-5 md:landscape:flex-row md:landscape:items-center md:landscape:gap-10 lg:flex-row lg:items-start lg:gap-12">
         <div className="relative rounded-[2.25rem] bg-white p-5 shadow-lift">
-          <div className="relative size-[min(70vw,56vh,460px)]">
+          <div className="relative size-[min(70vw,56vh,460px)] md:landscape:size-[min(45vw,62vh,460px)]">
             {status !== "forbidden" && session && !expired ? (
               <div
                 key={session.sessionId}
@@ -174,7 +174,7 @@ export function QrDisplay({ exitHref }: { exitHref: string }) {
           </div>
         </div>
 
-        <div className="flex max-w-sm flex-col items-center gap-7 lg:items-start">
+        <div className="flex max-w-sm flex-col items-center gap-7 md:landscape:items-start lg:items-start">
           <div className="flex items-center gap-4" aria-live="off">
             <svg viewBox="0 0 100 100" className="size-24 -rotate-90" aria-hidden="true">
               <circle cx="50" cy="50" r={R} stroke="currentColor" strokeOpacity="0.18" strokeWidth="8" fill="none" />
