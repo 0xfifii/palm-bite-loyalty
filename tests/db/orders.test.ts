@@ -116,13 +116,43 @@ describe("orders: delivery, payment, go ahead", () => {
     expect((await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, '12 Palm Street, Ado', 'call 12')", [items])).code).toBe("INVALID_CONTACT");
     const ok = await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, '12 Palm Street, Ado', '0803 123 4567')", [items]);
     expect(ok.code).toBe("ORDER_PLACED");
+    expect(ok.subtotal).toBe(frap.price_naira);
+    expect(ok.delivery_fee).toBe(2000);
+    expect(ok.total).toBe(frap.price_naira + 2000);
     const { rows } = await pool.query("select delivery_address, contact_phone, payment_status from public.orders where id = $1", [ok.order_id]);
     expect(rows[0]).toEqual({ delivery_address: "12 Palm Street, Ado", contact_phone: "08031234567", payment_status: "unpaid" });
+    const fee = await pool.query("select total_naira, delivery_fee_naira from public.orders where id = $1", [ok.order_id]);
+    expect(fee.rows[0]).toEqual({ total_naira: frap.price_naira + 2000, delivery_fee_naira: 2000 });
     // Delivery orders can go on their way and be delivered.
     for (const st of ["confirmed", "preparing", "on_the_way", "completed"]) {
       expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, $2)", [ok.order_id, st])).code).toBe("OK");
     }
     expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'preparing')", [ok.order_id])).code).toBe("ORDER_CLOSED");
+  });
+
+  it("pick up has no delivery fee; the fee is set by admins only", async () => {
+    const c = await createUser();
+    const o = await rpc("authenticated", c.id, "select public.place_order($1, 'pickup', null, null, null)", [JSON.stringify([{ id: frap.id, qty: 2 }])]);
+    expect(o.delivery_fee).toBe(0);
+    expect(o.total).toBe(frap.price_naira * 2);
+    expect((await rpc("authenticated", staff.id, "select public.admin_update_delivery_fee(500)")).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", admin.id, "select public.admin_update_delivery_fee(-1)")).code).toBe("INVALID_INPUT");
+    expect((await rpc("authenticated", admin.id, "select public.admin_update_delivery_fee(2500)")).code).toBe("OK");
+    const d = await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, '3 Market Road', '08031234567')", [JSON.stringify([{ id: frap.id, qty: 1 }])]);
+    expect(d.delivery_fee).toBe(2500);
+    expect((await rpc("authenticated", admin.id, "select public.admin_update_delivery_fee(2000)")).code).toBe("OK");
+  });
+
+  it("records the team member who accepted the order", async () => {
+    const c = await createUser();
+    const o = await rpc("authenticated", c.id, "select public.place_order($1, 'pickup', null, null, null)", [JSON.stringify([{ id: frap.id, qty: 1 }])]);
+    await rpc("authenticated", staff.id, "select public.set_order_status($1, 'confirmed')", [o.order_id]);
+    await rpc("authenticated", admin.id, "select public.set_order_status($1, 'preparing')", [o.order_id]);
+    const { rows } = await pool.query(
+      "select o.accepted_by, o.accepted_by_name = p.full_name as named, o.accepted_at is not null as at from public.orders o join public.profiles p on p.id = o.accepted_by where o.id = $1",
+      [o.order_id],
+    );
+    expect(rows[0]).toEqual({ accepted_by: staff.id, named: true, at: true });
   });
 
   it("receipts go in the customer's own folder; staff confirm payment", async () => {

@@ -5,7 +5,7 @@ import { FULFILMENT_LABELS } from "@/lib/order/message";
 import { OPEN_STATUSES } from "@/lib/order/status";
 import { Icon } from "@/components/ui/Icon";
 import { NotifyButton } from "@/components/notify/NotifyButton";
-import { NewOrderAlert, OrderActions } from "./OrderActions";
+import { OrderActions } from "./OrderActions";
 import { OrderStatusBadge, PaymentBadge } from "./OrderStatusBadge";
 import type { Order } from "@/lib/types";
 
@@ -37,14 +37,11 @@ export async function OrdersBoard({ show, customerLinks }: { show: "open" | "don
     for (const s of signed ?? []) if (s.path && s.signedUrl) receiptUrls.set(s.path, s.signedUrl);
   }
 
-  const signal = rows.map((r) => `${r.id}:${r.status}:${r.payment_status}:${r.go_ahead_at ?? ""}`).join("|");
-  const newCount = rows.filter((r) => r.status === "new").length;
 
   return (
     <>
       {show === "open" && (
         <>
-          <NewOrderAlert signal={signal} newCount={newCount} />
           <div className="mb-4 max-w-sm">
             <NotifyButton label="Notify this phone about new orders" tone="dark" />
           </div>
@@ -92,6 +89,12 @@ export async function OrdersBoard({ show, customerLinks }: { show: "open" | "don
                   )}
                 </p>
                 <p className="text-sm text-muted">{FULFILMENT_LABELS[o.fulfilment]}</p>
+                {o.accepted_by_name && (
+                  <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-olive-deep">
+                    <Icon name="user" className="size-4" /> Accepted by {o.accepted_by_name}
+                    {o.accepted_at ? `, ${formatDateTime(o.accepted_at, tz)}` : ""}
+                  </p>
+                )}
                 {phone && (
                   <a href={telHref(phone)} className="mt-1 inline-flex items-center gap-1.5 text-sm font-semibold text-olive-deep underline underline-offset-4">
                     <Icon name="phone" className="size-4" /> Call {phone}
@@ -113,6 +116,12 @@ export async function OrdersBoard({ show, customerLinks }: { show: "open" | "don
                     </li>
                   ))}
                 </ul>
+                {o.delivery_fee_naira > 0 && (
+                  <p className="mt-1 flex justify-between text-sm">
+                    <span>Delivery fee</span>
+                    <span className="tabular">{naira(o.delivery_fee_naira)}</span>
+                  </p>
+                )}
                 <p className="mt-2 flex justify-between border-t border-line pt-2 font-semibold">
                   <span>Total</span>
                   <span className="tabular">{naira(o.total_naira)}</span>

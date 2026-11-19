@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Wordmark } from "@/components/brand/Logo";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { BackButton } from "@/components/ui/BackButton";
+import { OrderAlerts } from "@/components/notify/OrderAlerts";
 
 const nav: { href: string; label: string; icon: IconName }[] = [
   { href: "/admin", label: "Overview", icon: "chart" },
@@ -91,7 +93,13 @@ export function AdminShell({ name, signOut, children }: { name: string; signOut:
         </div>
       )}
 
-      <main className="min-w-0 px-5 py-8 lg:px-10 lg:py-10">{children}</main>
+      <OrderAlerts mode="staff" />
+      <main className="min-w-0 px-5 py-8 lg:px-10 lg:py-10">
+        <div className="mb-4 empty:hidden">
+          <BackButton roots={nav.map((n) => n.href)} fallback="/admin" />
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

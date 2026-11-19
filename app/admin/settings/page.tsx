@@ -5,7 +5,7 @@ import { PageHeader, Panel, Table, Td } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { SubmitButton } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { updateBank, updateBusiness, updateSettings } from "@/app/admin/actions";
+import { updateBank, updateBusiness, updateDeliveryFee, updateSettings } from "@/app/admin/actions";
 import { Field, TextArea } from "@/components/ui/Field";
 import { loadBusiness } from "@/lib/loyalty/queries";
 import { StaffRequests } from "@/components/admin/StaffRequests";
@@ -87,6 +87,22 @@ export default async function SettingsPage() {
             />
             <SubmitButton variant="olive" pendingLabel="Saving...">
               Save details
+            </SubmitButton>
+          </ActionForm>
+        </Panel>
+
+        <Panel title="Delivery fee">
+          <ActionForm action={updateDeliveryFee} className="space-y-4">
+            <Field
+              label="Delivery fee in naira"
+              name="delivery_fee"
+              inputMode="numeric"
+              required
+              defaultValue={String(business.delivery_fee_naira)}
+              hint="Added to every delivery order's bill. Use 0 for free delivery."
+            />
+            <SubmitButton variant="olive" pendingLabel="Saving...">
+              Save delivery fee
             </SubmitButton>
           </ActionForm>
         </Panel>

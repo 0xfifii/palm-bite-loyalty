@@ -74,6 +74,12 @@ export function OrdersList({
             </li>
           ))}
         </ul>
+        {o.delivery_fee_naira > 0 && (
+          <p className="mt-1 flex justify-between text-sm">
+            <span>Delivery fee</span>
+            <span className="tabular">{naira(o.delivery_fee_naira)}</span>
+          </p>
+        )}
         <p className="mt-2 flex justify-between border-t border-line pt-2 font-semibold">
           <span>Total</span>
           <span className="tabular">{naira(o.total_naira)}</span>
@@ -85,6 +91,11 @@ export function OrdersList({
           </p>
         )}
         <p className="mt-2 text-sm font-medium text-olive-deep">{STATUS_HELP[o.status]}</p>
+        {o.accepted_by_name && o.status !== "cancelled" && (
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
+            <Icon name="user" className="size-4" /> Accepted by {o.accepted_by_name}
+          </p>
+        )}
 
         {isOpen && (
           <div className="mt-4 space-y-3">

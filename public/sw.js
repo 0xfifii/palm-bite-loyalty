@@ -9,7 +9,7 @@
   - API requests (/api/*) and Supabase calls are never intercepted, so
     points, scans and redemptions always require a live connection.
 */
-const VERSION = "pb-v4";
+const VERSION = "pb-v5";
 const STATIC_CACHE = `${VERSION}-static`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/brand/palmbite-wordmark.svg", "/brand/palmbite-mark.svg", "/icons/icon-192.png"];
@@ -91,7 +91,9 @@ self.addEventListener("push", (event) => {
       badge: "/icons/icon-192.png",
       tag: data.tag || undefined,
       renotify: Boolean(data.tag),
-      vibrate: [120, 60, 120],
+      vibrate: [200, 100, 200, 100, 200],
+      requireInteraction: Boolean(data.sticky),
+      silent: false,
       data: { url: data.url || "/orders" },
     }),
   );

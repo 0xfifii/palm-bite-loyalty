@@ -19,7 +19,19 @@ const schema = z.object({
 });
 
 export type PlaceOrderResult =
-  | { ok: true; orderId: string; reference: string; items: OrderLine[]; total: number; message: string; url: string; prefilled: boolean; paymentNote: string | null }
+  | {
+      ok: true;
+      orderId: string;
+      reference: string;
+      items: OrderLine[];
+      subtotal: number;
+      deliveryFee: number;
+      total: number;
+      message: string;
+      url: string;
+      prefilled: boolean;
+      paymentNote: string | null;
+    }
   | { ok: false; error: string; unavailable?: string; field?: "address" | "contact" };
 
 const ERRORS: Record<string, string> = {
@@ -61,6 +73,8 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   const business = await loadBusiness(supabase);
   const items = r.items as OrderLine[];
   const total = Number(r.total);
+  const deliveryFee = Number(r.delivery_fee ?? 0);
+  const subtotal = Number(r.subtotal ?? total - deliveryFee);
   const reference = String(r.reference);
   const message = orderMessage({
     reference,
@@ -71,6 +85,7 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
     fulfilment: d.fulfilment,
     note: d.note || null,
     address: d.fulfilment === "delivery" ? d.address : null,
+    deliveryFee,
   });
   const { url, prefilled } = whatsappUrl(business, message);
 
@@ -85,7 +100,7 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
   );
   revalidatePath("/orders");
   revalidatePath("/staff/orders");
-  return { ok: true, orderId: String(r.order_id), reference, items, total, message, url, prefilled, paymentNote: business.payment_note };
+  return { ok: true, orderId: String(r.order_id), reference, items, subtotal, deliveryFee, total, message, url, prefilled, paymentNote: business.payment_note };
 }
 
 const CUSTOMER_ERRORS: Record<string, string> = {

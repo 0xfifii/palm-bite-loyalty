@@ -103,6 +103,9 @@ export type Order = {
   paid_at: string | null;
   go_ahead_at: string | null;
   status_changed_at: string;
+  delivery_fee_naira: number;
+  accepted_by_name: string | null;
+  accepted_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -117,6 +120,7 @@ export type BusinessSettings = {
   bank_name: string;
   bank_account_name: string;
   bank_account_number: string;
+  delivery_fee_naira: number;
 };
 
 export type Redemption = {

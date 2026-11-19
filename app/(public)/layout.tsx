@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { BackButton } from "@/components/ui/BackButton";
 import { getSession } from "@/lib/auth";
 import { BottomNav } from "@/components/customer/BottomNav";
+import { OrderAlerts } from "@/components/notify/OrderAlerts";
 import { Wordmark } from "@/components/brand/Logo";
 
 export const dynamic = "force-dynamic";
@@ -33,8 +35,14 @@ export default async function PublicLayout({ children }: { children: React.React
             </nav>
           </header>
         )}
+        {signedIn && (
+          <div className="sticky top-0 z-30 px-4 pt-[calc(var(--safe-top)+0.5rem)] empty:hidden md:px-8">
+            <BackButton roots={["/menu"]} fallback="/home" />
+          </div>
+        )}
         {children}
       </div>
+      {signedIn && <OrderAlerts mode="fren" />}
       {signedIn && <BottomNav />}
     </div>
   );

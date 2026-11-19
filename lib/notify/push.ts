@@ -2,7 +2,7 @@ import "server-only";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type PushMessage = { title: string; body: string; url: string; tag?: string };
+export type PushMessage = { title: string; body: string; url: string; tag?: string; sticky?: boolean };
 
 let configured: boolean | null = null;
 
@@ -47,9 +47,10 @@ export async function notifyUser(userId: string, msg: PushMessage) {
   }
 }
 
-/** Notifies every active staff member and admin. */
+/** Notifies every active staff member and admin (stays on screen until seen). */
 export async function notifyStaff(msg: PushMessage) {
   if (!ready()) return;
+  msg = { sticky: true, ...msg };
   try {
     const { data } = await createAdminClient()
       .from("push_subscriptions")

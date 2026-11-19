@@ -37,6 +37,7 @@ export function OrderReview({
   const hasMerch = lines.some((l) => l.merch);
 
   const [fulfilment, setFulfilment] = useState<Fulfilment>("pickup");
+  const deliveryFee = fulfilment === "delivery" ? business.delivery_fee_naira : 0;
   const [note, setNote] = useState("");
   const [deliverTo, setDeliverTo] = useState("");
   const [contact, setContact] = useState(phone ? phone.replace(/^\+234/, "0") : "");
@@ -94,6 +95,12 @@ export function OrderReview({
               </li>
             ))}
           </ul>
+          {placed.deliveryFee > 0 && (
+            <p className="mt-2 flex justify-between text-sm">
+              <span>Delivery fee</span>
+              <span className="tabular">{naira(placed.deliveryFee)}</span>
+            </p>
+          )}
           <p className="mt-3 flex justify-between border-t border-line pt-3 font-semibold">
             <span>Total</span>
             <span className="tabular">{naira(placed.total)}</span>
@@ -229,7 +236,7 @@ export function OrderReview({
                     className={`h-12 w-full rounded-2xl border bg-cream px-4 outline-none focus:border-olive focus:ring-4 focus:ring-olive/15 ${fieldError === "contact" ? "border-danger" : "border-line"}`}
                   />
                 </div>
-                <p className="text-sm text-muted">Palm Bite will confirm the delivery fee with you.</p>
+                <p className="text-sm text-muted">Delivery fee: {naira(business.delivery_fee_naira)}, added to your bill.</p>
               </div>
             )}
             {hasMerch && <p className="mt-2 text-sm text-muted">Merch is collected in store at {address}.</p>}
@@ -250,9 +257,21 @@ export function OrderReview({
           </div>
 
           <div className="mt-5 rounded-[var(--radius-card)] bg-olive-deep p-5 text-cream">
+            {deliveryFee > 0 && (
+              <>
+                <p className="flex justify-between text-sm text-cream/80">
+                  <span>Items</span>
+                  <span className="tabular">{naira(total)}</span>
+                </p>
+                <p className="mt-1 mb-2 flex justify-between text-sm text-cream/80">
+                  <span>Delivery fee</span>
+                  <span className="tabular">{naira(deliveryFee)}</span>
+                </p>
+              </>
+            )}
             <p className="flex items-baseline justify-between">
               <span>Total</span>
-              <span className="type-heading tabular text-2xl">{naira(total)}</span>
+              <span className="type-heading tabular text-2xl">{naira(total + deliveryFee)}</span>
             </p>
             <p className="mt-1 text-xs text-cream/70">Pay by transfer to {business.bank_name}, {business.bank_account_number} ({business.bank_account_name}). You can upload the receipt after placing your order.</p>
           </div>

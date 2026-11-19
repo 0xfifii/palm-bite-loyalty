@@ -219,6 +219,15 @@ export async function updateBank(_prev: ActionState, formData: FormData): Promis
   return done(r, "Bank details saved.", ["/admin/settings", "/order", "/orders"]);
 }
 
+export async function updateDeliveryFee(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase } = await admin();
+  const fee = Number(String(formData.get("delivery_fee") ?? "").replace(/[^0-9]/g, ""));
+  if (!Number.isInteger(fee) || fee < 0 || fee > 100000) return { error: "Enter a delivery fee between 0 and 100,000." };
+  const { data, error } = await supabase.rpc("admin_update_delivery_fee", { p_fee: fee });
+  if (error) return { error: actionMessage("TEMPORARY_ERROR") };
+  return done(data as RpcResult, "Delivery fee saved.", ["/admin/settings", "/order"]);
+}
+
 const communitySchema = z.object({
   kind: z.enum(["club", "event"]),
   title: z.string().trim().min(2, "Add a title.").max(80),

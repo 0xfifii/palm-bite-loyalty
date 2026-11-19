@@ -178,7 +178,7 @@ with sync_playwright() as p:
     phone.get_by_role("button", name="Tell Palm Bite to go ahead").click()
     expect(phone.get_by_text("Palm Bite has been told to go ahead.")).to_be_visible()
     check("go ahead recorded", sql(f"select go_ahead_at is not null from public.orders where reference = '{ref}'") == "t")
-    check("order total stored from menu prices", sql(f"select total_naira from public.orders where reference = '{ref}'") == "33000")
+    check("order total = menu prices + 2,000 delivery fee", sql(f"select total_naira from public.orders where reference = '{ref}'") == "35000")
     admin.goto(f"{BASE}/admin/orders")
     expect(admin.get_by_text(ref)).to_be_visible()
     expect(admin.get_by_text("Customer said go ahead").first).to_be_visible()

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wordmark } from "@/components/brand/Logo";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { BackButton } from "@/components/ui/BackButton";
+import { OrderAlerts } from "@/components/notify/OrderAlerts";
 
 const tabs: { href: string; label: string; icon: IconName }[] = [
   { href: "/staff", label: "Approvals", icon: "check" },
@@ -51,7 +53,13 @@ export function StaffShell({ isAdmin, name, children }: { isAdmin: boolean; name
           })}
         </nav>
       </header>
-      <main className="mx-auto max-w-5xl px-5 py-8">{children}</main>
+      <OrderAlerts mode="staff" />
+      <main className="mx-auto max-w-5xl px-5 py-8">
+        <div className="mb-4 empty:hidden">
+          <BackButton roots={tabs.map((t) => t.href)} fallback="/staff" />
+        </div>
+        {children}
+      </main>
     </div>
   );
 }

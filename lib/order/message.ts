@@ -15,12 +15,14 @@ export function orderMessage(o: {
   note: string | null;
   address?: string | null;
   contact?: string | null;
+  deliveryFee?: number;
 }): string {
   const lines = [
     `Hello Palm Bite! New order ${o.reference}`,
     "",
     ...o.items.map((i) => `${i.qty} x ${i.name}  ${naira(i.line_total)}`),
     "",
+    ...(o.deliveryFee ? [`Delivery fee: ${naira(o.deliveryFee)}`] : []),
     `Total: ${naira(o.total)}`,
     `${FULFILMENT_LABELS[o.fulfilment]}`,
     `Name: ${o.name}${o.phone ? `  (${o.phone})` : ""}`,
