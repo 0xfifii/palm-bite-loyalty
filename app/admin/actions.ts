@@ -206,6 +206,19 @@ export async function updateBusiness(_prev: ActionState, formData: FormData): Pr
   return done(r, "Business details saved.", ["/admin/settings", "/home", "/menu", "/community"]);
 }
 
+export async function updateBank(_prev: ActionState, formData: FormData): Promise<ActionState> {
+  const { supabase } = await admin();
+  const { data, error } = await supabase.rpc("admin_update_bank", {
+    p_bank_name: String(formData.get("bank_name") ?? "").trim(),
+    p_account_name: String(formData.get("bank_account_name") ?? "").trim(),
+    p_account_number: String(formData.get("bank_account_number") ?? "").trim(),
+  });
+  if (error) return { error: actionMessage("TEMPORARY_ERROR") };
+  const r = data as RpcResult;
+  if (r.code === "INVALID_INPUT") return { error: "Check the details. The account number must be 10 digits." };
+  return done(r, "Bank details saved.", ["/admin/settings", "/order", "/orders"]);
+}
+
 const communitySchema = z.object({
   kind: z.enum(["club", "event"]),
   title: z.string().trim().min(2, "Add a title.").max(80),

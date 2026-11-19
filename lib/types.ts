@@ -94,16 +94,29 @@ export type Order = {
   total_naira: number;
   fulfilment: "pickup" | "dine_in" | "delivery";
   note: string | null;
-  status: "new" | "confirmed" | "ready" | "completed" | "cancelled";
+  status: OrderStatus;
+  delivery_address: string | null;
+  contact_phone: string | null;
+  payment_status: "unpaid" | "receipt_sent" | "paid";
+  receipt_path: string | null;
+  receipt_uploaded_at: string | null;
+  paid_at: string | null;
+  go_ahead_at: string | null;
+  status_changed_at: string;
   created_at: string;
   updated_at: string;
 };
+
+export type OrderStatus = "new" | "confirmed" | "preparing" | "ready" | "on_the_way" | "completed" | "cancelled";
 
 export type BusinessSettings = {
   order_link: string;
   whatsapp_number: string | null;
   store_address: string;
   payment_note: string | null;
+  bank_name: string;
+  bank_account_name: string;
+  bank_account_number: string;
 };
 
 export type Redemption = {

@@ -73,12 +73,15 @@ export function groupMenu(items: Drink[]) {
 }
 
 export async function loadBusiness(supabase: SupabaseClient): Promise<BusinessSettings> {
-  const { data } = await supabase.from("app_settings").select("order_link, whatsapp_number, store_address, payment_note").single();
+  const { data } = await supabase.from("app_settings").select("order_link, whatsapp_number, store_address, payment_note, bank_name, bank_account_name, bank_account_number").single();
   return {
     order_link: data?.order_link ?? "https://wa.me/message/DYZNLHGJWIAIC1",
     whatsapp_number: data?.whatsapp_number ?? null,
     store_address: data?.store_address ?? "Palm View, along UBA Gate",
     payment_note: data?.payment_note ?? null,
+    bank_name: data?.bank_name ?? "Providus Bank",
+    bank_account_name: data?.bank_account_name ?? "PalmBite",
+    bank_account_number: data?.bank_account_number ?? "1311482257",
   };
 }
 

@@ -24,6 +24,8 @@ const BUILT_IN: Record<string, string> = {
   "meat pie": "/photos/meat-pie.jpg",
   pizza: "/photos/pizza.jpg",
   croissant: "/photos/croissant.jpg",
+  "chicken pie": "/photos/chicken-pie.jpg",
+  "palm bread": "/photos/palm-bread.jpg",
   "sweet tooth": "/photos/sweet-tooth.jpg",
   shawarma: "/photos/shawarma.jpg",
   "potato waffles": "/photos/potato-waffles.jpg",

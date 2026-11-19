@@ -1,15 +1,23 @@
 import { Badge } from "@/components/ui/Badge";
-import type { Order } from "@/lib/types";
+import { statusLabel } from "@/lib/order/status";
+import type { Order, OrderStatus } from "@/lib/types";
 
-export const ORDER_STATUS_LABELS: Record<Order["status"], string> = {
-  new: "New",
-  confirmed: "Confirmed",
-  ready: "Ready",
-  completed: "Completed",
-  cancelled: "Cancelled",
+const TONE: Record<OrderStatus, "peach" | "olive" | "sage" | "muted" | "danger"> = {
+  new: "peach",
+  confirmed: "olive",
+  preparing: "olive",
+  ready: "sage",
+  on_the_way: "sage",
+  completed: "muted",
+  cancelled: "danger",
 };
 
-export function OrderStatusBadge({ status }: { status: Order["status"] }) {
-  const tone = { new: "peach", confirmed: "olive", ready: "sage", completed: "muted", cancelled: "danger" } as const;
-  return <Badge tone={tone[status]}>{ORDER_STATUS_LABELS[status]}</Badge>;
+export function OrderStatusBadge({ status, fulfilment = "pickup" }: { status: OrderStatus; fulfilment?: Order["fulfilment"] }) {
+  return <Badge tone={TONE[status]}>{statusLabel(status, fulfilment)}</Badge>;
+}
+
+export function PaymentBadge({ status }: { status: Order["payment_status"] }) {
+  if (status === "paid") return <Badge tone="olive">Paid</Badge>;
+  if (status === "receipt_sent") return <Badge tone="peach">Receipt sent</Badge>;
+  return <Badge tone="muted">Not paid yet</Badge>;
 }

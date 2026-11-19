@@ -9,7 +9,7 @@
   - API requests (/api/*) and Supabase calls are never intercepted, so
     points, scans and redemptions always require a live connection.
 */
-const VERSION = "pb-v3";
+const VERSION = "pb-v4";
 const STATIC_CACHE = `${VERSION}-static`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/brand/palmbite-wordmark.svg", "/brand/palmbite-mark.svg", "/icons/icon-192.png"];
@@ -73,4 +73,42 @@ self.addEventListener("fetch", (event) => {
       ),
     );
   }
+});
+
+/* Order notifications (web push). */
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "Palm Bite", body: event.data ? event.data.text() : "" };
+  }
+  const title = data.title || "Palm Bite";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: data.tag || undefined,
+      renotify: Boolean(data.tag),
+      vibrate: [120, 60, 120],
+      data: { url: data.url || "/orders" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || "/orders", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) {
+        if (w.url.startsWith(self.location.origin) && "focus" in w) {
+          w.navigate(target);
+          return w.focus();
+        }
+      }
+      return self.clients.openWindow(target);
+    }),
+  );
 });

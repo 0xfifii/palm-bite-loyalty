@@ -135,6 +135,13 @@ const paths: Record<string, React.ReactNode> = {
     </>
   ),
   spark: <path d="M12 3l2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2z" />,
+  bell: <path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0" />,
+  bank: <path d="M3 9.5 12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18" />,
+  upload: <path d="M12 16V4M7 9l5-5 5 5M5 20h14" />,
+  copy: <path d="M9 9h10v11H9zM5 15V4h10" />,
+  truck: <path d="M3 6h11v10H3zM14 10h4l3 3v3h-7M7 19a1.8 1.8 0 1 0 0-.01M17 19a1.8 1.8 0 1 0 0-.01" />,
+  receipt: <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h4" />,
+  flame: <path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-4 2.5-5 .3 1.6 1 2.5 2 3 0-3 0-5.5.5-8z" />,
 };
 
 export type IconName = keyof typeof paths;

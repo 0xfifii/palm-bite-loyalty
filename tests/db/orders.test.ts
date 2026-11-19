@@ -24,7 +24,7 @@ describe("menu", () => {
     const by = Object.fromEntries(rows.map((r) => [r.category, r]));
     expect(by["Gems"].n).toBe(4);
     expect(by["Slab"].n).toBe(4);
-    expect(by["Pastries"].n).toBe(6);
+    expect(by["Pastries"].n).toBe(8);
     expect(by["Merch"].n).toBe(4);
     expect(by["Our Picks"].n).toBe(3);
     expect(by["Slab"].any_reward).toBe(false);
@@ -98,10 +98,76 @@ describe("orders", () => {
     expect((await rpc("authenticated", b.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_NOT_FOUND");
     expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'completed')", [res.order_id])).code).toBe("FORBIDDEN");
     expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'confirmed')", [res.order_id])).code).toBe("OK");
-    expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_LOCKED");
+    expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'preparing')", [res.order_id])).code).toBe("OK");
+    expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'on_the_way')", [res.order_id])).code).toBe("INVALID_ORDER");
     expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'ready')", [res.order_id])).code).toBe("OK");
     const seenByStaff = await as("authenticated", staff.id, (c) => c.query("select status from public.orders where id = $1", [res.order_id]));
     expect(seenByStaff.rows[0].status).toBe("ready");
+  });
+});
+
+describe("orders: delivery, payment, go ahead", () => {
+  it("delivery needs an address and a contact number", async () => {
+    const c = await createUser();
+    const items = JSON.stringify([{ id: frap.id, qty: 1 }]);
+    expect((await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, null, '08031234567')", [items])).code).toBe("ADDRESS_REQUIRED");
+    expect((await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, '12 Palm Street, Ado', null)", [items])).code).toBe("CONTACT_REQUIRED");
+    expect((await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, '12 Palm Street, Ado', 'call 12')", [items])).code).toBe("INVALID_CONTACT");
+    const ok = await rpc("authenticated", c.id, "select public.place_order($1, 'delivery', null, '12 Palm Street, Ado', '0803 123 4567')", [items]);
+    expect(ok.code).toBe("ORDER_PLACED");
+    const { rows } = await pool.query("select delivery_address, contact_phone, payment_status from public.orders where id = $1", [ok.order_id]);
+    expect(rows[0]).toEqual({ delivery_address: "12 Palm Street, Ado", contact_phone: "08031234567", payment_status: "unpaid" });
+    // Delivery orders can go on their way and be delivered.
+    for (const st of ["confirmed", "preparing", "on_the_way", "completed"]) {
+      expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, $2)", [ok.order_id, st])).code).toBe("OK");
+    }
+    expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'preparing')", [ok.order_id])).code).toBe("ORDER_CLOSED");
+  });
+
+  it("receipts go in the customer's own folder; staff confirm payment", async () => {
+    const a = await createUser();
+    const b = await createUser();
+    const o = await rpc("authenticated", a.id, "select public.place_order($1, 'pickup', null, null, null)", [JSON.stringify([{ id: frap.id, qty: 1 }])]);
+    expect((await rpc("authenticated", a.id, "select public.submit_order_receipt($1, $2)", [o.order_id, `${b.id}/r.jpg`])).code).toBe("INVALID_INPUT");
+    expect((await rpc("authenticated", a.id, "select public.submit_order_receipt($1, $2)", [o.order_id, `${a.id}/../x.jpg`])).code).toBe("INVALID_INPUT");
+    expect((await rpc("authenticated", b.id, "select public.submit_order_receipt($1, $2)", [o.order_id, `${b.id}/r.jpg`])).code).toBe("ORDER_NOT_FOUND");
+    expect((await rpc("authenticated", a.id, "select public.submit_order_receipt($1, $2)", [o.order_id, `${a.id}/r-1.jpg`])).code).toBe("OK");
+    let { rows } = await pool.query("select payment_status, receipt_path from public.orders where id = $1", [o.order_id]);
+    expect(rows[0]).toEqual({ payment_status: "receipt_sent", receipt_path: `${a.id}/r-1.jpg` });
+    expect((await rpc("authenticated", a.id, "select public.set_order_payment($1, true)", [o.order_id])).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", staff.id, "select public.set_order_payment($1, true)", [o.order_id])).code).toBe("OK");
+    ({ rows } = await pool.query("select payment_status, paid_at is not null as paid from public.orders where id = $1", [o.order_id]));
+    expect(rows[0]).toEqual({ payment_status: "paid", paid: true });
+    expect((await rpc("authenticated", a.id, "select public.submit_order_receipt($1, $2)", [o.order_id, `${a.id}/r-2.jpg`])).code).toBe("ORDER_CLOSED");
+  });
+
+  it("go ahead is for the order's owner, and not too often", async () => {
+    const a = await createUser();
+    const b = await createUser();
+    const o = await rpc("authenticated", a.id, "select public.place_order($1, 'pickup', null, null, null)", [JSON.stringify([{ id: frap.id, qty: 1 }])]);
+    expect((await rpc("authenticated", b.id, "select public.order_go_ahead($1)", [o.order_id])).code).toBe("ORDER_NOT_FOUND");
+    expect((await rpc("authenticated", a.id, "select public.order_go_ahead($1)", [o.order_id])).code).toBe("OK");
+    expect((await rpc("authenticated", a.id, "select public.order_go_ahead($1)", [o.order_id])).code).toBe("RATE_LIMITED");
+  });
+
+  it("push subscriptions are private and limited per person", async () => {
+    const a = await createUser();
+    for (let i = 0; i < 7; i++) {
+      expect((await rpc("authenticated", a.id, "select public.save_push_subscription($1, $2, $3)", [`https://push.example/${a.id}/${i}`, "p".repeat(40), "a".repeat(16)])).code).toBe("OK");
+    }
+    const { rows } = await pool.query("select count(*)::int n from public.push_subscriptions where user_id = $1", [a.id]);
+    expect(rows[0].n).toBe(5);
+    expect((await rpc("authenticated", a.id, "select public.save_push_subscription($1, $2, $3)", ["http://insecure", "p".repeat(40), "a".repeat(16)])).code).toBe("INVALID_INPUT");
+    await expect(as("authenticated", a.id, (c) => c.query("select * from public.push_subscriptions"))).rejects.toThrow();
+  });
+
+  it("only admins change the bank details", async () => {
+    expect((await rpc("authenticated", staff.id, "select public.admin_update_bank('X Bank', 'PalmBite', '1234567890')")).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", admin.id, "select public.admin_update_bank('Providus Bank', 'PalmBite', '12345')")).code).toBe("INVALID_INPUT");
+    expect((await rpc("authenticated", admin.id, "select public.admin_update_bank('Providus Bank', 'PalmBite', '1311 482 257')")).code).toBe("OK");
+    const biz = await as("anon", null, async (c) => (await c.query("select bank_name, bank_account_name, bank_account_number from public.app_settings")).rows[0]);
+    expect(biz).toEqual({ bank_name: "Providus Bank", bank_account_name: "PalmBite", bank_account_number: "1311482257" });
   });
 });
 

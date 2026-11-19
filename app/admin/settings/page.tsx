@@ -5,7 +5,7 @@ import { PageHeader, Panel, Table, Td } from "@/components/admin/ui";
 import { ActionForm } from "@/components/admin/ActionForm";
 import { SubmitButton } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
-import { updateBusiness, updateSettings } from "@/app/admin/actions";
+import { updateBank, updateBusiness, updateSettings } from "@/app/admin/actions";
 import { Field, TextArea } from "@/components/ui/Field";
 import { loadBusiness } from "@/lib/loyalty/queries";
 import { StaffRequests } from "@/components/admin/StaffRequests";
@@ -83,10 +83,28 @@ export default async function SettingsPage() {
               rows={3}
               maxLength={500}
               defaultValue={business.payment_note ?? ""}
-              hint="Shown after an order is placed. For example your bank name, account name and account number."
+              hint="Extra note shown after an order is placed, for example a delivery fee."
             />
             <SubmitButton variant="olive" pendingLabel="Saving...">
               Save details
+            </SubmitButton>
+          </ActionForm>
+        </Panel>
+
+        <Panel title="Bank account for transfers">
+          <ActionForm action={updateBank} className="space-y-4">
+            <Field label="Bank" name="bank_name" required defaultValue={business.bank_name} />
+            <Field label="Account name" name="bank_account_name" required defaultValue={business.bank_account_name} />
+            <Field
+              label="Account number"
+              name="bank_account_number"
+              inputMode="numeric"
+              required
+              defaultValue={business.bank_account_number}
+              hint="Shown to Palm Frens at checkout with a copy button."
+            />
+            <SubmitButton variant="olive" pendingLabel="Saving...">
+              Save bank details
             </SubmitButton>
           </ActionForm>
         </Panel>

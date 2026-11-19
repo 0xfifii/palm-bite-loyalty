@@ -1,10 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth";
 import { actionMessage } from "@/lib/loyalty/codes";
-import type { RpcResult } from "@/lib/types";
+import type { Order, RpcResult } from "@/lib/types";
+import { customerUpdate } from "@/lib/order/status";
+import { notifyUser } from "@/lib/notify/push";
 
 const referenceSchema = z
   .string()
@@ -151,12 +154,40 @@ export async function decideVisit(requestId: string, approve: boolean): Promise<
 export async function updateOrderStatus(orderId: string, status: string): Promise<Result> {
   const { supabase } = await staff();
   const id = z.uuid().safeParse(orderId);
-  const st = z.enum(["new", "confirmed", "ready", "completed", "cancelled"]).safeParse(status);
+  const st = z.enum(["new", "confirmed", "preparing", "ready", "on_the_way", "completed", "cancelled"]).safeParse(status);
   if (!id.success || !st.success) return { ok: false, error: "Invalid request." };
   const { data, error } = await supabase.rpc("set_order_status", { p_order: id.data, p_status: st.data });
   if (error) return { ok: false, error: actionMessage("TEMPORARY_ERROR") };
-  if ((data as RpcResult).code !== "OK") return { ok: false, error: actionMessage((data as RpcResult).code) };
+  const r = data as RpcResult;
+  if (r.code === "ORDER_CLOSED") return { ok: false, error: "This order is already finished." };
+  if (r.code !== "OK") return { ok: false, error: actionMessage(r.code) };
+  const { data: o } = await supabase.from("orders").select("fulfilment").eq("id", id.data).single();
+  const msg = customerUpdate(st.data, (o?.fulfilment ?? "pickup") as Order["fulfilment"], String(r.reference));
+  if (msg && typeof r.customer_id === "string") {
+    const customer = r.customer_id;
+    after(() => notifyUser(customer, { ...msg, url: "/orders", tag: `order-${r.reference}` }));
+  }
   revalidatePath("/staff/orders");
   revalidatePath("/admin/orders");
+  revalidatePath("/orders");
+  return { ok: true };
+}
+
+/** Staff mark an order as paid (after checking the transfer) or undo it. */
+export async function setOrderPayment(orderId: string, paid: boolean): Promise<Result> {
+  const { supabase } = await staff();
+  const id = z.uuid().safeParse(orderId);
+  if (!id.success) return { ok: false, error: "Invalid request." };
+  const { data, error } = await supabase.rpc("set_order_payment", { p_order: id.data, p_paid: Boolean(paid) });
+  if (error) return { ok: false, error: actionMessage("TEMPORARY_ERROR") };
+  const r = data as RpcResult;
+  if (r.code !== "OK") return { ok: false, error: actionMessage(r.code) };
+  if (paid && typeof r.customer_id === "string") {
+    const customer = r.customer_id;
+    after(() => notifyUser(customer, { title: `Payment received for ${r.reference}`, body: "Thank you! Your payment has been confirmed.", url: "/orders", tag: `order-${r.reference}` }));
+  }
+  revalidatePath("/staff/orders");
+  revalidatePath("/admin/orders");
+  revalidatePath("/orders");
   return { ok: true };
 }

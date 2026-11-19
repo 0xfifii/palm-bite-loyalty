@@ -13,6 +13,8 @@ export function orderMessage(o: {
   total: number;
   fulfilment: Fulfilment;
   note: string | null;
+  address?: string | null;
+  contact?: string | null;
 }): string {
   const lines = [
     `Hello Palm Bite! New order ${o.reference}`,
@@ -23,6 +25,8 @@ export function orderMessage(o: {
     `${FULFILMENT_LABELS[o.fulfilment]}`,
     `Name: ${o.name}${o.phone ? `  (${o.phone})` : ""}`,
   ];
+  if (o.address) lines.push(`Deliver to: ${o.address}`);
+  if (o.contact) lines.push(`Contact: ${o.contact}`);
   if (o.note) lines.push(`Note: ${o.note}`);
   return lines.join("\n");
 }

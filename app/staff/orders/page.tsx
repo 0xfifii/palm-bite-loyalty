@@ -12,11 +12,11 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
   const done = show === "done";
   return (
     <>
-      <AutoRefresh />
+      <AutoRefresh seconds={10} />
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="type-heading text-[1.9rem]">Orders</h1>
-          <p className="mt-1 text-muted">Orders Palm Frens send from the app. Confirm on WhatsApp, then move each order along.</p>
+          <p className="mt-1 text-muted">Orders Palm Frens send from the app. Confirm each order, check the payment, then move it along.</p>
         </div>
         <div className="flex gap-2 rounded-full bg-surface p-1 text-sm font-semibold">
           <Link href="/staff/orders" className={`rounded-full px-4 py-2 ${!done ? "bg-olive-deep text-cream" : "text-muted"}`}>
