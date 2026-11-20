@@ -90,6 +90,18 @@ export function OrderAlerts({ mode }: { mode: "staff" | "fren" }) {
             }
           }
         }
+        // Number on the home screen icon: new orders for staff, open orders for Palm Frens.
+        try {
+          const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
+          const badge =
+            mode === "staff"
+              ? (json.orders as StaffRow[]).filter((r) => r.status === "new").length
+              : (json.orders as FrenRow[]).filter((r) => r.status === "ready" || r.status === "on_the_way").length;
+          if (badge > 0) await nav.setAppBadge?.(badge);
+          else await nav.clearAppBadge?.();
+        } catch {
+          /* badges not supported on this device */
+        }
         // First check after opening the app: show anything still waiting.
         if (!seen.current && mode === "staff") {
           const waiting = (json.orders as StaffRow[]).filter((r) => r.status === "new");

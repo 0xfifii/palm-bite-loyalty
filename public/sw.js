@@ -9,7 +9,7 @@
   - API requests (/api/*) and Supabase calls are never intercepted, so
     points, scans and redemptions always require a live connection.
 */
-const VERSION = "pb-v5";
+const VERSION = "pb-v6";
 const STATIC_CACHE = `${VERSION}-static`;
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/brand/palmbite-wordmark.svg", "/brand/palmbite-mark.svg", "/icons/icon-192.png"];
@@ -84,6 +84,12 @@ self.addEventListener("push", (event) => {
     data = { title: "Palm Bite", body: event.data ? event.data.text() : "" };
   }
   const title = data.title || "Palm Bite";
+  // Dot or number on the home screen icon until the app is opened.
+  try {
+    if (self.navigator && self.navigator.setAppBadge) self.navigator.setAppBadge(data.badge || undefined);
+  } catch {
+    /* not supported */
+  }
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",

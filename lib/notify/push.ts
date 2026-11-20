@@ -2,7 +2,7 @@ import "server-only";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type PushMessage = { title: string; body: string; url: string; tag?: string; sticky?: boolean };
+export type PushMessage = { title: string; body: string; url: string; tag?: string; sticky?: boolean; badge?: number };
 
 let configured: boolean | null = null;
 
@@ -68,6 +68,12 @@ export async function notifyUser(userId: string, msg: PushMessage) {
 export async function notifyStaff(msg: PushMessage) {
   if (!ready()) return;
   msg = { sticky: true, ...msg };
+  try {
+    const { count } = await createAdminClient().from("orders").select("id", { count: "exact", head: true }).eq("status", "new");
+    if (count) msg = { ...msg, badge: count };
+  } catch {
+    /* badge is optional */
+  }
   try {
     const { data } = await createAdminClient()
       .from("push_subscriptions")
