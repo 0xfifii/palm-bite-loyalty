@@ -37,7 +37,7 @@ export default async function PublicLayout({ children }: { children: React.React
         )}
         {signedIn && (
           <div className="sticky top-0 z-30 px-4 pt-[calc(var(--safe-top)+0.5rem)] empty:hidden md:px-8">
-            <BackButton roots={["/menu"]} fallback="/home" />
+            <BackButton roots={[]} fallback="/home" />
           </div>
         )}
         {children}

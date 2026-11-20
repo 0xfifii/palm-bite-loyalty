@@ -42,6 +42,7 @@ export function OrderReview({
   const [deliverTo, setDeliverTo] = useState("");
   const [contact, setContact] = useState(phone ? phone.replace(/^\+234/, "0") : "");
   const [fieldError, setFieldError] = useState<"address" | "contact" | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [placed, setPlaced] = useState<Placed | null>(null);
   const [copied, setCopied] = useState(false);
@@ -282,17 +283,69 @@ export function OrderReview({
               size="lg"
               full
               trailingArrow
-              onClick={submit}
+              onClick={() => setConfirming(true)}
               disabled={pending || (fulfilment === "delivery" && (deliverTo.trim().length < 5 || contact.replace(/[^0-9]/g, "").length < 7))}
               aria-busy={pending}
             >
-              {pending ? "Sending to Palm Bite..." : "Send order to Palm Bite"}
+              {pending ? "Sending to Palm Bite..." : "Send order"}
             </Button>
+            <p className="mt-2 text-center text-sm text-muted">You will check everything once more before it is sent.</p>
             {fulfilment === "delivery" && (deliverTo.trim().length < 5 || contact.replace(/[^0-9]/g, "").length < 7) && (
               <p className="mt-2 text-center text-sm text-muted">Add your delivery address and phone number to continue.</p>
             )}
           </div>
         </>
+      )}
+
+      {confirming && (
+        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-ink/50 p-3 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+          <div className="w-full max-w-md rounded-[var(--radius-sheet)] bg-cream p-6 shadow-lift">
+            <h2 id="confirm-title" className="type-heading text-2xl">
+              Send this order?
+            </h2>
+            <ul className="mt-4 space-y-1 text-sm">
+              {lines.map((l) => (
+                <li key={l.id} className="flex justify-between gap-3">
+                  <span>
+                    {l.qty} x {l.name}
+                  </span>
+                  <span className="tabular">{naira(l.price * l.qty)}</span>
+                </li>
+              ))}
+              {deliveryFee > 0 && (
+                <li className="flex justify-between gap-3">
+                  <span>Delivery fee</span>
+                  <span className="tabular">{naira(deliveryFee)}</span>
+                </li>
+              )}
+            </ul>
+            <p className="mt-3 flex justify-between border-t border-line pt-3 font-semibold">
+              <span>Total</span>
+              <span className="tabular">{naira(total + deliveryFee)}</span>
+            </p>
+            {fulfilment === "delivery" && <p className="mt-2 text-sm text-muted">Deliver to: {deliverTo}</p>}
+            <p className="mt-4 flex items-start gap-2 rounded-2xl bg-peach/60 px-4 py-3 text-sm font-semibold text-olive-night">
+              <Icon name="shield" className="mt-0.5 size-4 shrink-0" /> Once you send this order it can&apos;t be cancelled.
+            </p>
+            <div className="mt-5 grid gap-3">
+              <Button
+                variant="dark"
+                size="lg"
+                full
+                disabled={pending}
+                onClick={() => {
+                  setConfirming(false);
+                  submit();
+                }}
+              >
+                Yes, send order
+              </Button>
+              <Button variant="ghost" size="lg" full onClick={() => setConfirming(false)}>
+                Go back and edit
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

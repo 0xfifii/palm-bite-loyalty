@@ -105,23 +105,11 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderResult> {
 
 const CUSTOMER_ERRORS: Record<string, string> = {
   ORDER_NOT_FOUND: "Order not found.",
-  ORDER_LOCKED: "Palm Bite has already confirmed this order, so it can't be cancelled here. Please message Palm Bite.",
+  ORDER_LOCKED: "Orders can't be cancelled once sent. Please message Palm Bite.",
   ORDER_CLOSED: "This order is already finished.",
   RATE_LIMITED: "Palm Bite has just been told. Give the team a moment.",
   INVALID_INPUT: "That receipt couldn't be attached. Please try again.",
 };
-
-export async function cancelMyOrder(orderId: string): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, profile } = await requireUser("/orders");
-  if (!z.uuid().safeParse(orderId).success) return { ok: false, error: "Order not found." };
-  const { data, error } = await supabase.rpc("set_order_status", { p_order: orderId, p_status: "cancelled" });
-  const r = data as RpcResult | null;
-  if (error || r?.code !== "OK") return { ok: false, error: CUSTOMER_ERRORS[r?.code ?? ""] ?? "This order can't be cancelled right now." };
-  after(() => notifyStaff({ title: `Order ${r.reference} cancelled`, body: `${profile.full_name} cancelled their order.`, url: "/staff/orders", tag: `order-${r.reference}` }));
-  revalidatePath("/orders");
-  revalidatePath("/staff/orders");
-  return { ok: true };
-}
 
 /** "Go ahead": the Palm Fren tells the team to start on the order. */
 export async function goAhead(orderId: string): Promise<{ ok: boolean; error?: string }> {

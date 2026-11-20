@@ -89,7 +89,7 @@ describe("orders", () => {
     expect(codes[5]).toBe("RATE_LIMITED");
   });
 
-  it("customers see only their orders and can only cancel new ones; staff move them along", async () => {
+  it("customers see only their orders and can't cancel once sent; staff move them along", async () => {
     const a = await createUser();
     const b = await createUser();
     const res = await rpc("authenticated", a.id, "select public.place_order($1, 'dine_in', null)", [JSON.stringify([{ id: frap.id, qty: 1 }])]);
@@ -97,6 +97,7 @@ describe("orders", () => {
     expect(seenByB.rows).toHaveLength(0);
     expect((await rpc("authenticated", b.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_NOT_FOUND");
     expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'completed')", [res.order_id])).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_LOCKED");
     expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'confirmed')", [res.order_id])).code).toBe("OK");
     expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_LOCKED");
     expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'preparing')", [res.order_id])).code).toBe("OK");

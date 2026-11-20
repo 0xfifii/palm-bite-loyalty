@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useSyncExternalStore } from "react";
 import { ButtonLink } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icon";
 import { OrderStatusBadge, PaymentBadge } from "@/components/orders/OrderStatusBadge";
@@ -13,11 +12,10 @@ import { cartServerSnapshot, cartSnapshot, subscribeCart } from "@/lib/order/car
 import { FULFILMENT_LABELS } from "@/lib/order/message";
 import { OPEN_STATUSES } from "@/lib/order/status";
 import type { BusinessSettings, Order } from "@/lib/types";
-import { cancelMyOrder } from "../order/actions";
 
 const STATUS_HELP: Record<Order["status"], string> = {
   new: "Sent to Palm Bite. Waiting for the team to confirm.",
-  confirmed: "Confirmed. It can no longer be cancelled here.",
+  confirmed: "Confirmed by Palm Bite.",
   preparing: "We're preparing your order right now.",
   ready: "Ready! Come to the counter.",
   on_the_way: "Your order is on its way to you.",
@@ -36,11 +34,8 @@ export function OrdersList({
   business: BusinessSettings;
   userId: string;
 }) {
-  const router = useRouter();
   const cart = useSyncExternalStore(subscribeCart, cartSnapshot, cartServerSnapshot);
   const basketCount = cart.reduce((s, l) => s + l.qty, 0);
-  const [pending, start] = useTransition();
-  const [notice, setNotice] = useState<string | null>(null);
   const [showBank, setShowBank] = useState<string | null>(null);
   const open = orders.filter((o) => OPEN_STATUSES.includes(o.status));
   const past = orders.filter((o) => !OPEN_STATUSES.includes(o.status));
@@ -109,21 +104,7 @@ export function OrdersList({
               ))}
             <ReceiptUpload orderId={o.id} userId={userId} status={o.payment_status} />
             {(o.status === "new" || o.status === "confirmed") && <GoAheadButton orderId={o.id} sentAt={o.go_ahead_at} />}
-            {o.status === "new" && (
-              <button
-                disabled={pending}
-                onClick={() =>
-                  start(async () => {
-                    const res = await cancelMyOrder(o.id);
-                    setNotice(res.ok ? `Order ${o.reference} cancelled.` : (res.error ?? "Couldn't cancel."));
-                    if (res.ok) router.refresh();
-                  })
-                }
-                className="h-10 w-full rounded-full text-sm font-semibold text-danger hover:bg-danger-soft"
-              >
-                Cancel order
-              </button>
-            )}
+
           </div>
         )}
       </li>
@@ -144,9 +125,6 @@ export function OrdersList({
         {open.length > 0 && <NotifyButton label="Get notified when your order moves" />}
       </div>
 
-      <div className="mt-4" aria-live="polite">
-        {notice && <p className="rounded-2xl bg-sage-soft px-4 py-3 text-sm text-olive-night">{notice}</p>}
-      </div>
 
       {orders.length === 0 ? (
         <div className="mt-6 rounded-[var(--radius-card)] bg-surface p-6 text-center">

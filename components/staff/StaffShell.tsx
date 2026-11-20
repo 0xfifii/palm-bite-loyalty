@@ -56,7 +56,7 @@ export function StaffShell({ isAdmin, name, children }: { isAdmin: boolean; name
       <OrderAlerts mode="staff" />
       <main className="mx-auto max-w-5xl px-5 py-8">
         <div className="mb-4 empty:hidden">
-          <BackButton roots={tabs.map((t) => t.href)} fallback="/staff" />
+          <BackButton roots={["/staff"]} fallback="/staff" />
         </div>
         {children}
       </main>

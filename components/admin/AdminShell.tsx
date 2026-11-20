@@ -96,7 +96,7 @@ export function AdminShell({ name, signOut, children }: { name: string; signOut:
       <OrderAlerts mode="staff" />
       <main className="min-w-0 px-5 py-8 lg:px-10 lg:py-10">
         <div className="mb-4 empty:hidden">
-          <BackButton roots={nav.map((n) => n.href)} fallback="/admin" />
+          <BackButton roots={["/admin"]} fallback="/admin" />
         </div>
         {children}
       </main>
