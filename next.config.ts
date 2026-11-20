@@ -32,6 +32,10 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=()" },
   ...(isHttps ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }] : []),
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+  // Other websites can't embed Palm Bite pictures or files.
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+  // Ask AI services not to use the content for training.
+  { key: "X-Robots-Tag", value: "noai, noimageai" },
 ];
 
 const nextConfig: NextConfig = {

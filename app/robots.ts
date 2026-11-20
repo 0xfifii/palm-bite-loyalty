@@ -1,9 +1,12 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo";
+import { BLOCKED_BOTS } from "@/lib/bots";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
+      // AI crawlers and scrapers: no access at all.
+      { userAgent: BLOCKED_BOTS, disallow: ["/"] },
       {
         userAgent: "*",
         allow: ["/", "/menu", "/community", "/join"],

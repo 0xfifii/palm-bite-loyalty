@@ -1,0 +1,66 @@
+/**
+ * AI crawlers and data scrapers that may not read or copy Palm Bite.
+ * Normal search engines (Google, Bing) and link previews (WhatsApp,
+ * Facebook, X) are still allowed so people can find and share the site.
+ */
+export const BLOCKED_BOTS = [
+  "GPTBot",
+  "ChatGPT-User",
+  "OAI-SearchBot",
+  "ClaudeBot",
+  "Claude-Web",
+  "Claude-User",
+  "Claude-SearchBot",
+  "anthropic-ai",
+  "CCBot",
+  "Google-Extended",
+  "GoogleOther",
+  "Google-CloudVertexBot",
+  "Applebot-Extended",
+  "PerplexityBot",
+  "Perplexity-User",
+  "Bytespider",
+  "TikTokSpider",
+  "Amazonbot",
+  "meta-externalagent",
+  "meta-externalfetcher",
+  "FacebookBot",
+  "cohere-ai",
+  "cohere-training-data-crawler",
+  "MistralAI-User",
+  "Diffbot",
+  "YouBot",
+  "AI2Bot",
+  "Ai2Bot-Dolma",
+  "DuckAssistBot",
+  "Timpibot",
+  "ImagesiftBot",
+  "img2dataset",
+  "omgili",
+  "omgilibot",
+  "Webzio-Extended",
+  "iaskspider",
+  "PetalBot",
+  "PanguBot",
+  "Kangaroo Bot",
+  "ICC-Crawler",
+  "Brightbot",
+  "Scrapy",
+  "VelenPublicWebCrawler",
+  "Sidetrade",
+  "QualifiedBot",
+  "Andibot",
+  "bigsur.ai",
+  "Crawlspace",
+  "FirecrawlAgent",
+  "Factset_spyderbot",
+  "Novellum",
+  "SemrushBot-OCOB",
+  "SemrushBot-SWA",
+];
+
+const pattern = new RegExp(BLOCKED_BOTS.map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "i");
+
+export function isBlockedBot(userAgent: string | null): boolean {
+  return Boolean(userAgent && pattern.test(userAgent));
+}
