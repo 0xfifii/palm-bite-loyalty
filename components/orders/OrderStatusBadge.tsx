@@ -6,6 +6,7 @@ const TONE: Record<OrderStatus, "peach" | "olive" | "sage" | "muted" | "danger">
   new: "peach",
   confirmed: "olive",
   preparing: "olive",
+  packaging: "olive",
   ready: "sage",
   on_the_way: "sage",
   completed: "muted",

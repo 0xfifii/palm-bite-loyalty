@@ -96,7 +96,7 @@ describe("orders", () => {
     const seenByB = await as("authenticated", b.id, (c) => c.query("select id from public.orders where id = $1", [res.order_id]));
     expect(seenByB.rows).toHaveLength(0);
     expect((await rpc("authenticated", b.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_NOT_FOUND");
-    expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'completed')", [res.order_id])).code).toBe("FORBIDDEN");
+    expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'completed')", [res.order_id])).code).toBe("ORDER_LOCKED");
     expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_LOCKED");
     expect((await rpc("authenticated", staff.id, "select public.set_order_status($1, 'confirmed')", [res.order_id])).code).toBe("OK");
     expect((await rpc("authenticated", a.id, "select public.set_order_status($1, 'cancelled')", [res.order_id])).code).toBe("ORDER_LOCKED");
@@ -199,6 +199,55 @@ describe("orders: delivery, payment, go ahead", () => {
     expect((await rpc("authenticated", admin.id, "select public.admin_update_bank('Providus Bank', 'PalmBite', '1311 482 257')")).code).toBe("OK");
     const biz = await as("anon", null, async (c) => (await c.query("select bank_name, bank_account_name, bank_account_number from public.app_settings")).rows[0]);
     expect(biz).toEqual({ bank_name: "Providus Bank", bank_account_name: "PalmBite", bank_account_number: "1311482257" });
+  });
+});
+
+describe("orders v3: in charge, packaging, ready time, reasons, staff orders", () => {
+  const items = () => JSON.stringify([{ id: frap.id, qty: 1 }]);
+  const set = (who: string, id: unknown, st: string, reason: string | null = null, eta: number | null = null) =>
+    rpc("authenticated", who, "select public.staff_set_order_status($1, $2, $3, $4)", [id, st, reason, eta]);
+
+  it("the staff member who confirms is in charge; others can't move it, admins can", async () => {
+    const other = await createUser({ role: "staff" });
+    const c = await createUser();
+    const o = await rpc("authenticated", c.id, "select public.place_order($1, 'pickup', null, null, null)", [items()]);
+    expect((await set(staff.id, o.order_id, "confirmed", null, 3)).code).toBe("INVALID_ETA");
+    expect((await set(staff.id, o.order_id, "confirmed", null, 20)).code).toBe("OK");
+    const { rows } = await pool.query("select accepted_by, eta_minutes, eta_at > now() + interval '19 minutes' as eta_ok from public.orders where id = $1", [o.order_id]);
+    expect(rows[0]).toEqual({ accepted_by: staff.id, eta_minutes: 20, eta_ok: true });
+    const blocked = await set(other.id, o.order_id, "preparing");
+    expect(blocked.code).toBe("NOT_IN_CHARGE");
+    expect(blocked.in_charge).toBeTruthy();
+    expect((await rpc("authenticated", other.id, "select public.set_order_eta($1, 10)", [o.order_id])).code).toBe("NOT_IN_CHARGE");
+    for (const st of ["preparing", "packaging", "ready"]) expect((await set(staff.id, o.order_id, st)).code).toBe("OK");
+    expect((await set(admin.id, o.order_id, "completed")).code).toBe("OK");
+  });
+
+  it("cancelling needs a reason, which the customer can see", async () => {
+    const c = await createUser();
+    const o = await rpc("authenticated", c.id, "select public.place_order($1, 'pickup', null, null, null)", [items()]);
+    expect((await set(staff.id, o.order_id, "cancelled")).code).toBe("REASON_REQUIRED");
+    expect((await set(staff.id, o.order_id, "cancelled", "Not available")).code).toBe("OK");
+    const seen = await as("authenticated", c.id, (cl) => cl.query("select status, cancel_reason, accepted_by from public.orders where id = $1", [o.order_id]));
+    expect(seen.rows[0]).toEqual({ status: "cancelled", cancel_reason: "Not available", accepted_by: null });
+  });
+
+  it("staff place orders for customers and walk ins; they start confirmed and in charge", async () => {
+    const c = await createUser();
+    const forC = await rpc("authenticated", staff.id, "select public.staff_place_order($1, null, $2, 'pickup', null, null, null, true, 15)", [c.id, items()]);
+    expect(forC.code).toBe("ORDER_PLACED");
+    const { rows } = await pool.query("select customer_id, status, accepted_by, placed_by, payment_status, eta_minutes from public.orders where id = $1", [forC.order_id]);
+    expect(rows[0]).toEqual({ customer_id: c.id, status: "confirmed", accepted_by: staff.id, placed_by: staff.id, payment_status: "paid", eta_minutes: 15 });
+    const seen = await as("authenticated", c.id, (cl) => cl.query("select id from public.orders where id = $1", [forC.order_id]));
+    expect(seen.rows).toHaveLength(1);
+
+    const walk = await rpc("authenticated", staff.id, "select public.staff_place_order(null, 'Ada at table 3', $1, 'dine_in', null, null, null, false, null)", [items()]);
+    expect(walk.code).toBe("ORDER_PLACED");
+    expect((await rpc("authenticated", staff.id, "select public.staff_place_order(null, null, $1, 'pickup', null, null, null, false, null)", [items()])).code).toBe("CUSTOMER_REQUIRED");
+    expect((await rpc("authenticated", c.id, "select public.staff_place_order(null, 'Me', $1, 'pickup', null, null, null, true, null)", [items()])).code).toBe("FORBIDDEN");
+    const del = await rpc("authenticated", staff.id, "select public.staff_place_order(null, 'Tunde', $1, 'delivery', null, '5 Market Road', '08030000000', false, 30)", [items()]);
+    expect(del.code).toBe("ORDER_PLACED");
+    expect(del.delivery_fee).toBe(2000);
   });
 });
 

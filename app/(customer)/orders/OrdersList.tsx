@@ -7,6 +7,7 @@ import { OrderStatusBadge, PaymentBadge } from "@/components/orders/OrderStatusB
 import { OrderTracker } from "@/components/orders/OrderTracker";
 import { BankCard, GoAheadButton, ReceiptUpload } from "@/components/orders/PayAndSend";
 import { NotifyButton } from "@/components/notify/NotifyButton";
+import { EtaText } from "@/components/orders/EtaText";
 import { naira } from "@/lib/format";
 import { cartServerSnapshot, cartSnapshot, subscribeCart } from "@/lib/order/cart";
 import { FULFILMENT_LABELS } from "@/lib/order/message";
@@ -17,10 +18,11 @@ const STATUS_HELP: Record<Order["status"], string> = {
   new: "Sent to Palm Bite. Waiting for the team to confirm.",
   confirmed: "Confirmed by Palm Bite.",
   preparing: "We're preparing your order right now.",
+  packaging: "Almost ready. We're packing it up.",
   ready: "Ready! Come to the counter.",
   on_the_way: "Your order is on its way to you.",
-  completed: "Completed. Enjoy!",
-  cancelled: "Cancelled.",
+  completed: "Done. Enjoy, Palm Fren!",
+  cancelled: "Cancelled by Palm Bite.",
 };
 
 export function OrdersList({
@@ -86,6 +88,12 @@ export function OrdersList({
           </p>
         )}
         <p className="mt-2 text-sm font-medium text-olive-deep">{STATUS_HELP[o.status]}</p>
+        {isOpen && o.eta_at && (
+          <p className="mt-2 flex items-center gap-2 rounded-xl bg-peach/50 px-3 py-2 text-sm font-semibold text-olive-night">
+            <Icon name="clock" className="size-4" /> <EtaText at={o.eta_at} minutes={o.eta_minutes} />
+          </p>
+        )}
+        {o.status === "cancelled" && o.cancel_reason && <p className="mt-1 text-sm text-danger">Reason: {o.cancel_reason}</p>}
         {o.accepted_by_name && o.status !== "cancelled" && (
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted">
             <Icon name="user" className="size-4" /> Accepted by {o.accepted_by_name}

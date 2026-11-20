@@ -10,6 +10,7 @@ import { OrderAlerts } from "@/components/notify/OrderAlerts";
 const tabs: { href: string; label: string; icon: IconName }[] = [
   { href: "/staff", label: "Approvals", icon: "check" },
   { href: "/staff/orders", label: "Orders", icon: "bag" },
+  { href: "/staff/new-order", label: "New order", icon: "plus" },
   { href: "/staff/redeem", label: "Redeem", icon: "gift" },
   { href: "/staff/check-in", label: "Check in", icon: "users" },
   { href: "/staff/qr", label: "Visit QR", icon: "qr" },
@@ -27,6 +28,9 @@ export function StaffShell({ isAdmin, name, children }: { isAdmin: boolean; name
           </div>
           <div className="flex items-center gap-3 text-sm">
             <span className="hidden text-cream/75 sm:inline">{name}</span>
+            <Link href="/home?view=fren" className="rounded-full bg-cream/12 px-3 py-1.5 font-semibold hover:bg-cream/20">
+              Palm Fren view
+            </Link>
             {isAdmin && (
               <Link href="/admin" className="rounded-full bg-cream px-3 py-1.5 font-semibold text-olive-night">
                 Admin

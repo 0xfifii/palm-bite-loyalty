@@ -8,7 +8,7 @@ export function OrderTracker({ status, fulfilment }: { status: Order["status"]; 
   const steps = trackerSteps(fulfilment);
   const at = steps.indexOf(status);
   return (
-    <ol className="mt-4 grid grid-cols-5 gap-1" aria-label="Order progress">
+    <ol className="mt-4 grid grid-cols-6 gap-1" aria-label="Order progress">
       {steps.map((s, i) => {
         const done = i < at || status === "completed";
         const now = i === at && status !== "completed";

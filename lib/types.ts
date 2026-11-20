@@ -89,7 +89,7 @@ export type OrderLine = { id: string; name: string; qty: number; price: number; 
 export type Order = {
   id: string;
   reference: string;
-  customer_id: string;
+  customer_id: string | null;
   items: OrderLine[];
   total_naira: number;
   fulfilment: "pickup" | "dine_in" | "delivery";
@@ -106,11 +106,17 @@ export type Order = {
   delivery_fee_naira: number;
   accepted_by_name: string | null;
   accepted_at: string | null;
+  accepted_by: string | null;
+  walk_in_name: string | null;
+  placed_by: string | null;
+  eta_minutes: number | null;
+  eta_at: string | null;
+  cancel_reason: string | null;
   created_at: string;
   updated_at: string;
 };
 
-export type OrderStatus = "new" | "confirmed" | "preparing" | "ready" | "on_the_way" | "completed" | "cancelled";
+export type OrderStatus = "new" | "confirmed" | "preparing" | "packaging" | "ready" | "on_the_way" | "completed" | "cancelled";
 
 export type BusinessSettings = {
   order_link: string;
