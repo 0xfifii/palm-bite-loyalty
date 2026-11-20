@@ -25,7 +25,8 @@ async function deliver(subs: Sub[], msg: PushMessage) {
         await webpush.sendNotification(
           { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
           JSON.stringify(msg),
-          { TTL: 60 * 60, urgency: "high" },
+          // Kept for up to 24 hours, so a phone that was off or offline still gets it.
+          { TTL: 24 * 60 * 60, urgency: "high" },
         );
       } catch (e) {
         const code = (e as { statusCode?: number }).statusCode;

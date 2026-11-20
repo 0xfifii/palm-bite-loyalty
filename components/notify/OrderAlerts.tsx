@@ -90,6 +90,19 @@ export function OrderAlerts({ mode }: { mode: "staff" | "fren" }) {
             }
           }
         }
+        // First check after opening the app: show anything still waiting.
+        if (!seen.current && mode === "staff") {
+          const waiting = (json.orders as StaffRow[]).filter((r) => r.status === "new");
+          if (waiting.length) {
+            loud = true;
+            fresh.push({
+              id: `waiting-${waiting.map((w) => w.id).join("-")}`,
+              title: waiting.length === 1 ? `Order ${waiting[0].reference} is waiting` : `${waiting.length} orders are waiting`,
+              body: "Sent while you were away. Tap to confirm on the orders board.",
+              href: "/staff/orders",
+            });
+          }
+        }
         seen.current = next;
         if (!stop && fresh.length) {
           setBanners((b) => [...fresh, ...b].slice(0, 3));
