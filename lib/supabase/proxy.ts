@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { isThirdPartySession } from "@/lib/auth-methods";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED_PREFIXES = ["/home", "/notifications", "/orders", "/order", "/scan", "/rewards", "/profile", "/staff", "/admin", "/display"];
@@ -31,7 +32,12 @@ export async function updateSession(request: NextRequest) {
 
   // Verifies the token and refreshes it when needed.
   const { data } = await supabase.auth.getClaims();
-  const user = data?.claims?.sub ? { id: data.claims.sub } : null;
+  let user = data?.claims?.sub ? { id: data.claims.sub } : null;
+  if (user && isThirdPartySession(data?.claims)) {
+    // Outside-app sign-ins are refused: end that session here.
+    await supabase.auth.signOut();
+    user = null;
+  }
 
   const path = request.nextUrl.pathname;
   const needsAuth = PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(`${p}/`));

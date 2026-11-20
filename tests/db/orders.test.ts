@@ -251,6 +251,29 @@ describe("orders v3: in charge, packaging, ready time, reasons, staff orders", (
   });
 });
 
+describe("only Palm Bite email sign-ins get staff powers", () => {
+  it("an admin signed in through an outside provider is treated as a customer", async () => {
+    const asOutside = async (provider: string) => {
+      const c = await pool.connect();
+      try {
+        await c.query("begin");
+        await c.query("select set_config('request.jwt.claims', $1, true)", [
+          JSON.stringify({ sub: admin.id, role: "authenticated", app_metadata: { provider }, amr: [{ method: provider === "email" ? "password" : "oauth" }] }),
+        ]);
+        await c.query("set local role authenticated");
+        const { rows } = await c.query("select public.is_admin() as admin, public.is_staff() as staff");
+        await c.query("rollback");
+        return rows[0];
+      } finally {
+        c.release();
+      }
+    };
+    expect(await asOutside("email")).toEqual({ admin: true, staff: true });
+    expect(await asOutside("google")).toEqual({ admin: false, staff: false });
+    expect(await asOutside("apple")).toEqual({ admin: false, staff: false });
+  });
+});
+
 describe("community and business settings", () => {
   it("only admins can edit community items and business details", async () => {
     const c = await createUser();

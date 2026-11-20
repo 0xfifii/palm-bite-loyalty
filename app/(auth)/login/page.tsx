@@ -15,6 +15,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <p className="mt-2 text-muted">Sign in to see your card and collect today&apos;s point.</p>
       <div className="mt-6 space-y-3">
         {sp.error === "link" && <Notice tone="error">That link has expired or was already used. Please sign in or request a new one.</Notice>}
+        {sp.error === "method" && <Notice tone="error">Please sign in with your Palm Bite email and password. Other sign-in apps are not allowed.</Notice>}
         {sp.reset === "1" && <Notice tone="success">Password updated. Please sign in.</Notice>}
       </div>
       <LoginForm next={next} />

@@ -3,6 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile, UserRole } from "@/lib/types";
+import { isThirdPartySession } from "@/lib/auth-methods";
 
 /**
  * Returns the verified user and their profile. getClaims() verifies the
@@ -15,7 +16,8 @@ export const getSession = cache(async () => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const sub = data?.claims?.sub;
-  const user = typeof sub === "string" ? { id: sub } : null;
+  // Sign-ins through outside apps or providers are not accepted, admins included.
+  const user = typeof sub === "string" && !isThirdPartySession(data?.claims) ? { id: sub } : null;
   if (!user) return { supabase, user: null, profile: null } as const;
 
   const { data: profile } = await supabase

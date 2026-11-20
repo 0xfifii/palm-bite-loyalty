@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { safeNext } from "@/lib/auth";
+import { isThirdPartySession } from "@/lib/auth-methods";
 
 /**
  * Handles email confirmation and password recovery links. Supports both the
@@ -25,6 +26,13 @@ export async function GET(request: NextRequest) {
     ok = !error;
   }
 
+  if (ok) {
+    const { data } = await supabase.auth.getClaims();
+    if (isThirdPartySession(data?.claims)) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(new URL("/login?error=method", request.nextUrl.origin));
+    }
+  }
   const destination = ok ? (type === "recovery" ? "/reset-password" : next) : "/login?error=link";
   return NextResponse.redirect(new URL(destination, request.nextUrl.origin));
 }
