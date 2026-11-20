@@ -37,10 +37,12 @@ export function OrderReview({
   const hasMerch = lines.some((l) => l.merch);
 
   const [fulfilment, setFulfilment] = useState<Fulfilment>("pickup");
-  const deliveryFee = fulfilment === "delivery" ? business.delivery_fee_naira : 0;
+  const [feeAgreed, setFeeAgreed] = useState(false);
+  const deliveryFee = fulfilment === "delivery" && feeAgreed ? business.delivery_fee_naira : 0;
   const [note, setNote] = useState("");
   const [deliverTo, setDeliverTo] = useState("");
   const [contact, setContact] = useState(phone ? phone.replace(/^\+234/, "0") : "");
+  const deliveryIncomplete = fulfilment === "delivery" && (!feeAgreed || deliverTo.trim().length < 5 || contact.replace(/[^0-9]/g, "").length < 7);
   const [fieldError, setFieldError] = useState<"address" | "contact" | null>(null);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -198,13 +200,38 @@ export function OrderReview({
                     fulfilment === f ? "border-olive-deep bg-sage-mist" : "border-line bg-surface"
                   }`}
                 >
-                  <input type="radio" name="fulfilment" value={f} checked={fulfilment === f} onChange={() => setFulfilment(f)} className="sr-only" />
+                  <input type="radio" name="fulfilment" value={f} checked={fulfilment === f} onChange={() => {
+                      setFulfilment(f);
+                      if (f !== "delivery") setFeeAgreed(false);
+                    }} className="sr-only" />
                   {FULFILMENT_LABELS[f]}
                 </label>
               ))}
             </div>
-            {fulfilment === "delivery" && (
+            {fulfilment === "delivery" && !feeAgreed && (
+              <div className="mt-4 rounded-[var(--radius-card)] border-2 border-peach bg-surface p-5">
+                <p className="flex items-center gap-2 font-semibold">
+                  <Icon name="truck" className="size-5" /> Delivery costs {naira(business.delivery_fee_naira)}
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  The delivery fee is added to your bill and paid together with your order. Your new total will be{" "}
+                  <span className="tabular font-semibold text-ink">{naira(total + business.delivery_fee_naira)}</span>.
+                </p>
+                <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                  <Button variant="dark" size="md" full onClick={() => setFeeAgreed(true)}>
+                    I agree to pay {naira(business.delivery_fee_naira)}
+                  </Button>
+                  <Button variant="ghost" size="md" full onClick={() => setFulfilment("pickup")}>
+                    No, I will pick up
+                  </Button>
+                </div>
+              </div>
+            )}
+            {fulfilment === "delivery" && feeAgreed && (
               <div className="mt-4 space-y-4 rounded-[var(--radius-card)] bg-surface p-4">
+                <p className="flex items-center gap-2 rounded-xl bg-sage-soft px-3 py-2 text-sm font-semibold text-olive-night">
+                  <Icon name="check" className="size-4" /> You agreed to pay {naira(business.delivery_fee_naira)} for delivery
+                </p>
                 <div>
                   <label htmlFor="deliver-to" className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold">
                     <Icon name="pin" className="size-4" /> Delivery address
@@ -237,7 +264,7 @@ export function OrderReview({
                     className={`h-12 w-full rounded-2xl border bg-cream px-4 outline-none focus:border-olive focus:ring-4 focus:ring-olive/15 ${fieldError === "contact" ? "border-danger" : "border-line"}`}
                   />
                 </div>
-                <p className="text-sm text-muted">Delivery fee: {naira(business.delivery_fee_naira)}, added to your bill.</p>
+
               </div>
             )}
             {hasMerch && <p className="mt-2 text-sm text-muted">Merch is collected in store at {address}.</p>}
@@ -284,14 +311,16 @@ export function OrderReview({
               full
               trailingArrow
               onClick={() => setConfirming(true)}
-              disabled={pending || (fulfilment === "delivery" && (deliverTo.trim().length < 5 || contact.replace(/[^0-9]/g, "").length < 7))}
+              disabled={pending || deliveryIncomplete}
               aria-busy={pending}
             >
               {pending ? "Sending to Palm Bite..." : "Send order"}
             </Button>
             <p className="mt-2 text-center text-sm text-muted">You will check everything once more before it is sent.</p>
-            {fulfilment === "delivery" && (deliverTo.trim().length < 5 || contact.replace(/[^0-9]/g, "").length < 7) && (
-              <p className="mt-2 text-center text-sm text-muted">Add your delivery address and phone number to continue.</p>
+            {deliveryIncomplete && (
+              <p className="mt-2 text-center text-sm text-muted">
+                {feeAgreed ? "Add your delivery address and phone number to continue." : `Agree to the ${naira(business.delivery_fee_naira)} delivery fee to continue.`}
+              </p>
             )}
           </div>
         </>
