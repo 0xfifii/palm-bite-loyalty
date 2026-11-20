@@ -44,6 +44,9 @@ export async function OrdersBoard({ show, customerLinks }: { show: "open" | "don
         <>
           <div className="mb-4 max-w-sm">
             <NotifyButton label="Notify this phone about new orders" tone="dark" />
+            <Link href="/notifications" className="mt-2 inline-block text-sm font-semibold text-olive-deep underline underline-offset-4">
+              Not getting notifications? Check this phone
+            </Link>
           </div>
         </>
       )}

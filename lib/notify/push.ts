@@ -17,8 +17,10 @@ function ready(): boolean {
 
 type Sub = { endpoint: string; p256dh: string; auth: string };
 
-async function deliver(subs: Sub[], msg: PushMessage) {
+async function deliver(subs: Sub[], msg: PushMessage): Promise<{ sent: number; failed: { status?: number; message: string }[] }> {
   const db = createAdminClient();
+  let sent = 0;
+  const failed: { status?: number; message: string }[] = [];
   await Promise.all(
     subs.map(async (s) => {
       try {
@@ -28,13 +30,27 @@ async function deliver(subs: Sub[], msg: PushMessage) {
           // Kept for up to 24 hours, so a phone that was off or offline still gets it.
           { TTL: 24 * 60 * 60, urgency: "high" },
         );
+        sent++;
       } catch (e) {
-        const code = (e as { statusCode?: number }).statusCode;
+        const err = e as { statusCode?: number; body?: string; message?: string };
+        failed.push({ status: err.statusCode, message: String(err.body || err.message || "unknown").slice(0, 200) });
         // The phone unsubscribed or the browser forgot it: tidy up.
-        if (code === 404 || code === 410) await db.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
+        if (err.statusCode === 404 || err.statusCode === 410) await db.from("push_subscriptions").delete().eq("endpoint", s.endpoint);
       }
     }),
   );
+  return { sent, failed };
+}
+
+/** For the notification check screen: sends a test to the signed-in person. */
+export async function testPush(userId: string) {
+  const configured = ready();
+  if (!configured) return { configured, devices: 0, sent: 0, failed: [] as { status?: number; message: string }[] };
+  const { data } = await createAdminClient().from("push_subscriptions").select("endpoint, p256dh, auth").eq("user_id", userId);
+  const subs = data ?? [];
+  if (!subs.length) return { configured, devices: 0, sent: 0, failed: [] };
+  const r = await deliver(subs, { title: "Palm Bite test notification", body: "It works! You'll get order updates like this.", url: "/notifications", tag: "pb-test" });
+  return { configured, devices: subs.length, ...r };
 }
 
 /** Notifies one Palm Fren on every device they turned notifications on for. */

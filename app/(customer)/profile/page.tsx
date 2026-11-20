@@ -61,6 +61,9 @@ export default async function ProfilePage() {
         <Link href="/orders" className="flex items-center justify-between py-4 font-medium">
           Your orders <Icon name="arrow" className="size-4 text-muted" />
         </Link>
+        <Link href="/notifications" className="flex items-center justify-between py-4 font-medium">
+          Notifications <Icon name="arrow" className="size-4 text-muted" />
+        </Link>
         <Link href="/rewards#visits" className="flex items-center justify-between py-4 font-medium">
           Visit history <Icon name="arrow" className="size-4 text-muted" />
         </Link>

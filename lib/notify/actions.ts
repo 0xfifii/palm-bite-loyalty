@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { testPush } from "./push";
 
 const sub = z.object({
   endpoint: z.url().startsWith("https://").max(1000),
@@ -25,4 +26,9 @@ export async function removePushSubscription(endpoint: string): Promise<{ ok: bo
   const { supabase } = await requireUser("/orders");
   const { error } = await supabase.rpc("remove_push_subscription", { p_endpoint: String(endpoint).slice(0, 1000) });
   return { ok: !error };
+}
+
+export async function sendTestNotification() {
+  const { user } = await requireUser("/notifications");
+  return testPush(user.id);
 }
