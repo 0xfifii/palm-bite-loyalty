@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { NotifyButton } from "@/components/notify/NotifyButton";
-import { sendTestNotification } from "@/lib/notify/actions";
+import { sendTestEmail, sendTestNotification } from "@/lib/notify/actions";
 
 type Row = { label: string; ok: boolean | null; fix?: string };
 
@@ -80,6 +80,25 @@ export function NotificationCheck() {
         className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-ink text-sm font-semibold text-cream active:scale-[0.98]"
       >
         <Icon name="bell" className="size-4" /> {busy ? "Sending..." : "Send me a test notification"}
+      </button>
+      <button
+        type="button"
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          setResult(null);
+          try {
+            const r = await sendTestEmail();
+            setResult(r.ready ? `Test email sent to ${r.to}. Check your inbox (and spam) in a minute.` : "Email isn't set up yet. The owner needs to add the Brevo keys in Vercel, then Redeploy.");
+          } catch {
+            setResult("Couldn't reach Palm Bite. Try again.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+        className="flex h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-ink text-sm font-semibold active:scale-[0.98]"
+      >
+        Send me a test email
       </button>
       {result && <p className="rounded-2xl bg-sage-soft px-4 py-3 text-sm text-olive-night" aria-live="polite">{result}</p>}
     </div>

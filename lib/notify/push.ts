@@ -1,8 +1,9 @@
 import "server-only";
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailStaff, emailUser } from "./email";
 
-export type PushMessage = { title: string; body: string; url: string; tag?: string; sticky?: boolean; badge?: number };
+export type PushMessage = { title: string; body: string; url: string; tag?: string; sticky?: boolean; badge?: number; email?: boolean };
 
 let configured: boolean | null = null;
 
@@ -55,6 +56,11 @@ export async function testPush(userId: string) {
 
 /** Notifies one Palm Fren on every device they turned notifications on for. */
 export async function notifyUser(userId: string, msg: PushMessage) {
+  const mail = msg.email ? emailUser(userId, { subject: `Palm Bite: ${msg.title}`, heading: msg.title, body: msg.body, url: msg.url, button: "Track my order" }) : Promise.resolve();
+  await Promise.all([mail, pushUser(userId, msg)]);
+}
+
+async function pushUser(userId: string, msg: PushMessage) {
   if (!ready()) return;
   try {
     const { data } = await createAdminClient().from("push_subscriptions").select("endpoint, p256dh, auth").eq("user_id", userId);
@@ -66,6 +72,12 @@ export async function notifyUser(userId: string, msg: PushMessage) {
 
 /** Notifies every active staff member and admin (stays on screen until seen). */
 export async function notifyStaff(msg: PushMessage) {
+  // Email the team too (Brevo), marked high priority.
+  const mail = emailStaff({ subject: `Palm Bite: ${msg.title}`, heading: msg.title, body: msg.body, url: msg.url, button: "Open the orders board" });
+  await Promise.all([mail, pushStaff(msg)]);
+}
+
+async function pushStaff(msg: PushMessage) {
   if (!ready()) return;
   msg = { sticky: true, ...msg };
   try {

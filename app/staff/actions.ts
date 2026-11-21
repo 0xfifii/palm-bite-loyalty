@@ -183,7 +183,8 @@ export async function updateOrderStatus(orderId: string, status: string, reason?
   });
   if (msg && typeof r.customer_id === "string") {
     const customer = r.customer_id;
-    after(() => notifyUser(customer, { ...msg, url: "/orders", tag: `order-${r.reference}` }));
+    const email = ["confirmed", "ready", "on_the_way", "cancelled"].includes(st.data);
+    after(() => notifyUser(customer, { ...msg, url: "/orders", tag: `order-${r.reference}`, email }));
   }
   revalidatePath("/staff/orders");
   revalidatePath("/admin/orders");
@@ -281,7 +282,7 @@ export async function setOrderPayment(orderId: string, paid: boolean): Promise<R
   if (r.code !== "OK") return { ok: false, error: actionMessage(r.code) };
   if (paid && typeof r.customer_id === "string") {
     const customer = r.customer_id;
-    after(() => notifyUser(customer, { title: `Payment received for ${r.reference}`, body: "Thank you! Your payment has been confirmed.", url: "/orders", tag: `order-${r.reference}` }));
+    after(() => notifyUser(customer, { title: `Payment received for ${r.reference}`, body: "Thank you! Your payment has been confirmed.", url: "/orders", tag: `order-${r.reference}`, email: true }));
   }
   revalidatePath("/staff/orders");
   revalidatePath("/admin/orders");

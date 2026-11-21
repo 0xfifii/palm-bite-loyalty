@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { emailReady } from "@/lib/notify/email";
 
 export const dynamic = "force-dynamic";
 
@@ -15,5 +16,5 @@ export async function GET() {
   } catch {
     database = false;
   }
-  return NextResponse.json({ keys, database, anyPhones }, { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json({ keys, database, anyPhones, email: emailReady() }, { headers: { "Cache-Control": "no-store" } });
 }

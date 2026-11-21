@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { testPush } from "./push";
+import { emailReady, emailUser } from "./email";
 
 const sub = z.object({
   endpoint: z.url().startsWith("https://").max(1000),
@@ -31,4 +32,18 @@ export async function removePushSubscription(endpoint: string): Promise<{ ok: bo
 export async function sendTestNotification() {
   const { user } = await requireUser("/notifications");
   return testPush(user.id);
+}
+
+export async function sendTestEmail(): Promise<{ ready: boolean; to: string | null }> {
+  const { user, profile } = await requireUser("/notifications");
+  if (!emailReady()) return { ready: false, to: null };
+  await emailUser(user.id, {
+    subject: "Palm Bite: test email",
+    heading: "Email notifications work",
+    body: "You'll get Palm Bite order emails like this one.",
+    url: "/notifications",
+    button: "Open Palm Bite",
+    urgent: true,
+  });
+  return { ready: true, to: profile.email };
 }
